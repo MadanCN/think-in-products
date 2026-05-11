@@ -1,58 +1,113 @@
 import { NextRequest, NextResponse } from "next/server";
+import React from "react";
+import { z } from "zod";
+import { render } from "@react-email/render";
 import { createServerSupabaseClient } from "@/lib/supabase";
-import { resend } from "@/lib/resend";
+import { resend, FROM_EMAIL } from "@/lib/resend";
+import WelcomeEmail from "@/lib/emails/WelcomeEmail";
+import { generateUnsubscribeToken } from "@/lib/unsubscribeToken";
+
+const schema = z.object({
+  email: z.string().email("Please enter a valid email address."),
+  name: z.string().max(100).optional(),
+  source: z.string().max(50).optional(),
+});
 
 export async function POST(req: NextRequest) {
+  // ── 1. Parse + validate ────────────────────────────────────────────────
+  let body: unknown;
   try {
-    const body = await req.json();
-    const { email } = body;
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
 
-    if (!email || typeof email !== "string" || !email.includes("@")) {
-      return NextResponse.json({ error: "A valid email address is required." }, { status: 400 });
-    }
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Invalid input." },
+      { status: 400 }
+    );
+  }
 
-    const normalised = email.toLowerCase().trim();
-    const supabase = createServerSupabaseClient();
+  const { email, name, source = "homepage" } = parsed.data;
+  const normalised = email.toLowerCase().trim();
 
-    // Upsert into newsletter_subscribers — idempotent on email
-    const { error: dbError } = await supabase
-      .from("newsletter_subscribers")
-      .upsert(
-        { email: normalised, status: "active", subscribed_at: new Date().toISOString() },
-        { onConflict: "email", ignoreDuplicates: true }
+  // ── 2. Check for existing subscriber ──────────────────────────────────
+  const supabase = createServerSupabaseClient();
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("newsletter_subscribers")
+    .select("id, status")
+    .eq("email", normalised)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("[subscribe] fetch error:", fetchError.message);
+    return NextResponse.json({ error: "Failed to check subscription." }, { status: 500 });
+  }
+
+  // ── 3. Insert or re-activate ───────────────────────────────────────────
+  if (existing) {
+    if (existing.status === "active") {
+      return NextResponse.json(
+        { error: "This email is already subscribed." },
+        { status: 409 }
       );
+    }
+    // Re-activate a previously unsubscribed address
+    const { error } = await supabase
+      .from("newsletter_subscribers")
+      .update({
+        status: "active",
+        subscribed_at: new Date().toISOString(),
+        unsubscribed_at: null,
+        name: name ?? null,
+      })
+      .eq("id", existing.id);
 
-    if (dbError) {
-      console.error("[subscribe] DB error:", dbError.message);
+    if (error) {
+      console.error("[subscribe] re-activate error:", error.message);
+      return NextResponse.json({ error: "Failed to update subscription." }, { status: 500 });
+    }
+  } else {
+    const { error } = await supabase.from("newsletter_subscribers").insert({
+      email: normalised,
+      name: name ?? null,
+      status: "active",
+      source,
+      subscribed_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.error("[subscribe] insert error:", error.message);
       return NextResponse.json({ error: "Failed to save subscription." }, { status: 500 });
     }
-
-    // Send welcome email via Resend
-    if (process.env.RESEND_API_KEY) {
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL ?? "hello@thinkinproducts.com",
-        to: normalised,
-        subject: "Welcome to Think in Products",
-        html: `
-          <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; color: #F1F5F9; background: #080C14; padding: 40px 32px; border-radius: 12px;">
-            <h1 style="font-size: 24px; font-weight: 700; color: #00E5CC; margin-bottom: 16px;">You're in.</h1>
-            <p style="color: #94A3B8; line-height: 1.6;">
-              Thanks for subscribing to Think in Products. Every two weeks you'll get one piece of writing — no noise, no roundups. Just the thing and why it matters.
-            </p>
-            <p style="color: #94A3B8; line-height: 1.6; margin-top: 16px;">
-              While you're here, start with the <a href="${process.env.NEXT_PUBLIC_SITE_URL}/roadmap" style="color: #00E5CC;">PM Roadmap</a> — it's the fastest way to orient yourself.
-            </p>
-            <p style="color: #475569; font-size: 13px; margin-top: 32px;">
-              You can unsubscribe any time by replying "unsubscribe".
-            </p>
-          </div>
-        `,
-      });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("[subscribe] Unexpected error:", err);
-    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
   }
+
+  // ── 4. Send welcome email ──────────────────────────────────────────────
+  if (process.env.RESEND_API_KEY) {
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://thinkinproducts.com";
+    const token = generateUnsubscribeToken(normalised);
+    const unsubscribeUrl = `${siteUrl}/api/unsubscribe?email=${encodeURIComponent(normalised)}&token=${encodeURIComponent(token)}`;
+
+    try {
+      const html = await render(
+        React.createElement(WelcomeEmail, { name, unsubscribeUrl, siteUrl })
+      );
+
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: normalised,
+        subject: "Welcome to Think In Products",
+        html,
+      });
+    } catch (err) {
+      // Non-fatal — subscriber is already saved; log and continue
+      console.error("[subscribe] email send failed:", err);
+    }
+  }
+
+  return NextResponse.json({ success: true });
 }

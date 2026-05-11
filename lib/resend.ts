@@ -8,5 +8,8 @@ if (!process.env.RESEND_API_KEY) {
 
 export const resend = new Resend(process.env.RESEND_API_KEY ?? "");
 
+// Supports FROM_EMAIL (per spec) and RESEND_FROM_EMAIL (legacy) env vars
 export const FROM_EMAIL =
-  process.env.RESEND_FROM_EMAIL ?? "hello@thinkinproducts.com";
+  process.env.FROM_EMAIL ??
+  process.env.RESEND_FROM_EMAIL ??
+  "hello@thinkinproducts.com";
