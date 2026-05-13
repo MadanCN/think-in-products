@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getAdminCase } from "@/app/actions/portfolio";
 import { CaseStudyEditor } from "@/components/admin/portfolio/CaseStudyEditor";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CaseStudyEditorPage({
   params,
 }: {

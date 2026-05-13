@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { logActivity } from "./activity";
 
@@ -156,4 +157,5 @@ export async function updateSettings(
     );
   if (error) throw new Error(error.message);
   void logActivity({ action: "settings_updated", entity_type: "settings", entity_name: key });
+  revalidatePath("/", "layout");
 }

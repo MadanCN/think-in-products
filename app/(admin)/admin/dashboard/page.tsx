@@ -13,6 +13,8 @@ import {
 import { Card } from "@/components/ui";
 import { createServerSupabaseClient } from "@/lib/supabase";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: "Dashboard — Admin" };
 
 // ─── Data fetchers ────────────────────────────────────────────────────────────

@@ -34,6 +34,18 @@ export interface AdminBroadcast {
   updated_at: string;
 }
 
+export interface BroadcastEventStats {
+  delivered: number;
+  bounced: number;
+  opened: number;
+  clicked: number;
+  complained: number;
+}
+
+export interface AdminBroadcastWithStats extends AdminBroadcast {
+  stats: BroadcastEventStats;
+}
+
 // ─── Subscribers ──────────────────────────────────────────────────────────────
 
 export async function getSubscribers(): Promise<AdminSubscriber[]> {
@@ -131,6 +143,7 @@ export async function updateBroadcast(
     .select()
     .single();
   if (error) throw new Error(error.message);
+  revalidatePath("/admin/newsletter/broadcast");
   return data as AdminBroadcast;
 }
 
@@ -201,4 +214,34 @@ export async function updateWelcomeTemplate(
       { onConflict: "key" }
     );
   if (error) throw new Error(error.message);
+}
+
+// ─── Broadcast analytics ──────────────────────────────────────────────────────
+
+const EMPTY_STATS: BroadcastEventStats = {
+  delivered: 0, bounced: 0, opened: 0, clicked: 0, complained: 0,
+};
+
+export async function getBroadcastsWithStats(): Promise<AdminBroadcastWithStats[]> {
+  const db = createServerSupabaseClient();
+  const [broadcastsResult, eventsResult] = await Promise.all([
+    db.from("broadcasts").select("*").order("created_at", { ascending: false }),
+    db.from("broadcast_events").select("broadcast_id, event_type"),
+  ]);
+
+  const broadcasts = (broadcastsResult.data ?? []) as AdminBroadcast[];
+  const events = eventsResult.data ?? [];
+
+  const statsMap: Record<string, BroadcastEventStats> = {};
+  for (const ev of events) {
+    if (!statsMap[ev.broadcast_id]) {
+      statsMap[ev.broadcast_id] = { ...EMPTY_STATS };
+    }
+    const key = ev.event_type as keyof BroadcastEventStats;
+    if (key in statsMap[ev.broadcast_id]) {
+      statsMap[ev.broadcast_id][key]++;
+    }
+  }
+
+  return broadcasts.map((b) => ({ ...b, stats: statsMap[b.id] ?? { ...EMPTY_STATS } }));
 }

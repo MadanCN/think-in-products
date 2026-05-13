@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getRecentActivity } from "@/app/actions/activity";
 import AuditLogTable from "@/components/admin/AuditLogTable";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: "Audit Log — Admin" };
 
 export default async function AuditLogPage() {

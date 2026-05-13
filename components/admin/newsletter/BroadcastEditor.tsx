@@ -20,7 +20,7 @@ import {
   updateBroadcast,
   deleteBroadcast,
 } from "@/app/actions/newsletter";
-import type { AdminBroadcast } from "@/app/actions/newsletter";
+import type { AdminBroadcastWithStats, BroadcastEventStats } from "@/app/actions/newsletter";
 import { mdToHtml } from "@/lib/mdToHtml";
 import { useToast, ToastContainer } from "@/components/admin/Toast";
 import { cn } from "@/lib/utils";
@@ -95,6 +95,81 @@ function EmailPreview({
   );
 }
 
+function StatPill({
+  label,
+  value,
+  sub,
+  rose,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  rose?: boolean;
+}) {
+  return (
+    <div className="flex flex-col">
+      <span className="font-mono text-[10px] uppercase tracking-wider text-text-muted">{label}</span>
+      <span className={cn("font-display text-lg font-bold leading-none mt-0.5", rose ? "text-rose-400" : "text-text-primary")}>
+        {value}
+      </span>
+      {sub && <span className="font-mono text-[10px] text-text-muted mt-0.5">{sub}</span>}
+    </div>
+  );
+}
+
+function StatsPanel({
+  stats,
+  recipientCount,
+}: {
+  stats: BroadcastEventStats;
+  recipientCount: number;
+}) {
+  const hasAny = stats.delivered + stats.bounced + stats.opened + stats.clicked + stats.complained > 0;
+  const deliveryRate = recipientCount > 0 ? Math.round((stats.delivered / recipientCount) * 100) : 0;
+  const openRate = stats.delivered > 0 ? Math.round((stats.opened / stats.delivered) * 100) : 0;
+  const clickRate = stats.opened > 0 ? Math.round((stats.clicked / stats.opened) * 100) : 0;
+
+  return (
+    <div className="shrink-0 border-b border-border bg-bg-secondary/20 px-6 py-3">
+      <div className="flex items-center justify-between mb-3">
+        <p className="font-mono text-[10px] uppercase tracking-wider text-text-muted">Delivery Analytics</p>
+        {!hasAny && (
+          <span className="font-mono text-[10px] text-text-muted italic">
+            Waiting for webhook events — check Resend dashboard for setup
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-5 gap-5">
+        <StatPill
+          label="Sent"
+          value={recipientCount.toLocaleString()}
+        />
+        <StatPill
+          label="Delivered"
+          value={stats.delivered.toLocaleString()}
+          sub={recipientCount > 0 ? `${deliveryRate}% delivery` : undefined}
+        />
+        <StatPill
+          label="Opened"
+          value={stats.opened.toLocaleString()}
+          sub={stats.delivered > 0 ? `${openRate}% open rate` : undefined}
+        />
+        <StatPill
+          label="Clicked"
+          value={stats.clicked.toLocaleString()}
+          sub={stats.opened > 0 ? `${clickRate}% CTR` : undefined}
+        />
+        <StatPill
+          label="Bounced"
+          value={stats.bounced.toLocaleString()}
+          rose={stats.bounced > 0}
+          sub={stats.complained > 0 ? `${stats.complained} complaint${stats.complained > 1 ? "s" : ""}` : undefined}
+        />
+      </div>
+    </div>
+  );
+}
+
 interface ChecklistItem {
   label: string;
   pass: boolean;
@@ -125,7 +200,7 @@ function Checklist({ items }: { items: ChecklistItem[] }) {
 }
 
 interface Props {
-  broadcasts: AdminBroadcast[];
+  broadcasts: AdminBroadcastWithStats[];
   activeCount: number;
 }
 
@@ -133,7 +208,7 @@ type ConfirmMode = "send" | "resend" | null;
 
 export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: Props) {
   const [broadcasts, setBroadcasts] = useState(initialBroadcasts);
-  const [selected, setSelected] = useState<AdminBroadcast | null>(
+  const [selected, setSelected] = useState<AdminBroadcastWithStats | null>(
     initialBroadcasts.find((b) => b.status === "draft") ?? null
   );
 
@@ -176,11 +251,12 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
       if (!cur || cur.status === "sent") return;
       setSaveState("saving");
       try {
-        const updated = await updateBroadcast(cur.id, {
+        const raw = await updateBroadcast(cur.id, {
           subject: f.subject,
           preview_text: f.previewText,
           content: f.content,
         });
+        const updated: AdminBroadcastWithStats = { ...raw, stats: cur.stats };
         setSelected(updated);
         setBroadcasts((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
         setSaveState("saved");
@@ -199,7 +275,8 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
   async function handleNewBroadcast() {
     setSaveState("saving");
     try {
-      const b = await createBroadcast({ subject: "Untitled Broadcast" });
+      const raw = await createBroadcast({ subject: "Untitled Broadcast" });
+      const b: AdminBroadcastWithStats = { ...raw, stats: { delivered: 0, bounced: 0, opened: 0, clicked: 0, complained: 0 } };
       setBroadcasts((prev) => [b, ...prev]);
       setSelected(b);
       setSubject(b.subject);
@@ -216,11 +293,12 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
     if (!selected) return;
     setDuplicating(true);
     try {
-      const b = await createBroadcast({
+      const raw = await createBroadcast({
         subject: `${subject} (Copy)`,
         preview_text: previewText,
         content,
       });
+      const b: AdminBroadcastWithStats = { ...raw, stats: { delivered: 0, bounced: 0, opened: 0, clicked: 0, complained: 0 } };
       setBroadcasts((prev) => [b, ...prev]);
       setSelected(b);
       setSubject(b.subject);
@@ -235,7 +313,7 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
     }
   }
 
-  function selectBroadcast(b: AdminBroadcast) {
+  function selectBroadcast(b: AdminBroadcastWithStats) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setSelected(b);
     setSubject(b.subject);
@@ -249,11 +327,12 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
     if (!selected) return;
     setSaveState("saving");
     try {
-      const updated = await updateBroadcast(selected.id, {
+      const raw = await updateBroadcast(selected.id, {
         subject,
         preview_text: previewText,
         content,
       });
+      const updated: AdminBroadcastWithStats = { ...raw, stats: selected.stats };
       setSelected(updated);
       setBroadcasts((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
       setSaveState("saved");
@@ -315,11 +394,12 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
       toast({ message: `Sent to ${json.sent.toLocaleString()} subscribers`, type: "success" });
-      const updatedBroadcast = {
+      const updatedBroadcast: AdminBroadcastWithStats = {
         ...selected,
         status: "sent" as const,
         recipient_count: json.sent,
         sent_at: new Date().toISOString(),
+        stats: { delivered: 0, bounced: 0, opened: 0, clicked: 0, complained: 0 },
       };
       setSelected(updatedBroadcast);
       setBroadcasts((prev) => prev.map((b) => (b.id === selected.id ? updatedBroadcast : b)));
@@ -506,7 +586,9 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
                   )}
                   {b.status === "sent" && (
                     <p className="font-mono text-[10px] text-text-muted">
-                      {b.recipient_count ?? 0} recipients
+                      {b.recipient_count ?? 0} sent
+                      {b.stats.delivered > 0 && ` · ${b.stats.delivered} delivered`}
+                      {b.stats.opened > 0 && ` · ${b.stats.opened} opens`}
                     </p>
                   )}
                 </button>
@@ -519,14 +601,22 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
             <div className="flex flex-1 overflow-hidden flex-col">
               {/* Sent notice banner */}
               {isSent && (
-                <div className="shrink-0 px-6 py-2.5 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
+                <div className="shrink-0 px-6 py-2 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
                   <p className="text-xs text-emerald-400 font-mono">
                     Sent {selected.sent_at ? formatDate(selected.sent_at) : ""} · {selected.recipient_count ?? 0} recipients · Read-only
                   </p>
                   <p className="text-xs text-emerald-400/70 font-mono">
-                    Use Duplicate to create an editable copy, or Resend to re-send now
+                    Duplicate to edit, or Resend to re-send
                   </p>
                 </div>
+              )}
+
+              {/* Analytics panel for sent broadcasts */}
+              {isSent && selected.stats && (
+                <StatsPanel
+                  stats={selected.stats}
+                  recipientCount={selected.recipient_count ?? 0}
+                />
               )}
 
               {/* Subject + preview_text */}

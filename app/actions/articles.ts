@@ -74,6 +74,7 @@ export async function createArticle(input: Partial<ArticleInput>): Promise<Admin
   if (error) throw new Error(error.message);
   revalidatePath("/admin/articles");
   revalidatePath("/learn");
+  revalidatePath("/");
   void logActivity({ action: "article_created", entity_type: "article", entity_name: (data as AdminArticle).title });
   return data as AdminArticle;
 }

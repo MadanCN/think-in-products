@@ -181,6 +181,7 @@ export async function POST(req: NextRequest) {
         to: sub.email,
         subject: broadcast.subject as string,
         html,
+        tags: [{ name: "broadcast_id", value: broadcastId }],
       };
     });
 

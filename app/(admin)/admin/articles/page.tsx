@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getArticles } from "@/app/actions/articles";
 import { ArticleList } from "@/components/admin/articles/ArticleList";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: "Articles — Admin" };
 
 export default async function AdminArticlesPage() {

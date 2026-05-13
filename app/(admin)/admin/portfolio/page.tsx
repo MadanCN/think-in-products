@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getAdminCases } from "@/app/actions/portfolio";
 import { PortfolioAdminList } from "@/components/admin/portfolio/PortfolioAdminList";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: "Portfolio — Admin" };
 
 export default async function AdminPortfolioPage() {
