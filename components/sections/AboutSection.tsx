@@ -3,26 +3,24 @@
 import { motion } from "framer-motion";
 import { Github, Linkedin, Twitter } from "lucide-react";
 import { Badge } from "@/components/ui";
-import type { ProfileSettings, SocialSettings } from "@/app/actions/settings";
+import type { ProfileSettings, SocialSettings, ToolItem } from "@/app/actions/settings";
 
-const TOOLS = [
-  { name: "Figma",     cls: "bg-[#FF7262]/10 text-[#FF7262]    border-[#FF7262]/25"   },
-  { name: "Notion",    cls: "bg-white/8     text-text-primary  border-border"          },
-  { name: "Linear",    cls: "bg-[#5E6AD2]/10 text-[#5E6AD2]   border-[#5E6AD2]/25"   },
-  { name: "Supabase",  cls: "bg-[#3ECF8E]/10 text-[#3ECF8E]   border-[#3ECF8E]/25"   },
-  { name: "Next.js",   cls: "bg-white/8     text-text-primary  border-border"          },
-  { name: "SQL",       cls: "bg-accent-primary/10 text-accent-primary border-accent-primary/25" },
-  { name: "Mixpanel",  cls: "bg-[#7856FF]/10 text-[#7856FF]   border-[#7856FF]/25"   },
-  { name: "Miro",      cls: "bg-[#FFD02F]/10 text-[#FFD02F]   border-[#FFD02F]/25"   },
-];
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace("#", "").padEnd(6, "0");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 interface Props {
   profile: ProfileSettings;
   social: SocialSettings;
   shortBio?: string;
+  tools?: ToolItem[];
 }
 
-export default function AboutSection({ profile, social, shortBio }: Props) {
+export default function AboutSection({ profile, social, shortBio, tools = [] }: Props) {
   const bio = shortBio || profile.bio;
   if (!profile.name && !bio) return null;
 
@@ -35,10 +33,12 @@ export default function AboutSection({ profile, social, shortBio }: Props) {
 
   const socialLinks = [
     { href: social.twitter  ? `https://twitter.com/${social.twitter.replace(/^@/, "")}`  : null, Icon: Twitter,  label: "Twitter"  },
-    { href: social.linkedin ? `https://linkedin.com/in/${social.linkedin}`                 : null, Icon: Linkedin, label: "LinkedIn" },
-    { href: social.github   ? `https://github.com/${social.github}`                        : null, Icon: Github,   label: "GitHub"   },
+    { href: social.linkedin ? social.linkedin.startsWith("http") ? social.linkedin : `https://linkedin.com/in/${social.linkedin}` : null, Icon: Linkedin, label: "LinkedIn" },
+    { href: social.github   ? social.github.startsWith("http") ? social.github : `https://github.com/${social.github}`   : null, Icon: Github,   label: "GitHub"   },
     ...social.other.map((o) => ({ href: o.url, Icon: Github, label: o.platform })),
   ].filter((l) => l.href);
+
+  const visibleTools = tools.filter((t) => t.name.trim());
 
   return (
     <section className="py-24 px-6">
@@ -71,7 +71,6 @@ export default function AboutSection({ profile, social, shortBio }: Props) {
                     </span>
                   </div>
                 )}
-                {/* Online indicator */}
                 <span className="absolute -bottom-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-400 border-2 border-bg-primary" />
               </div>
 
@@ -113,22 +112,28 @@ export default function AboutSection({ profile, social, shortBio }: Props) {
                 <p className="text-text-secondary leading-relaxed max-w-2xl">{bio}</p>
               )}
 
-              {/* Tools */}
-              <div>
-                <p className="font-mono text-xs text-text-muted uppercase tracking-widest mb-3">
-                  Tools &amp; Stack
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {TOOLS.map((t) => (
-                    <span
-                      key={t.name}
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-mono font-semibold border ${t.cls}`}
-                    >
-                      {t.name}
-                    </span>
-                  ))}
+              {visibleTools.length > 0 && (
+                <div>
+                  <p className="font-mono text-xs text-text-muted uppercase tracking-widest mb-3">
+                    Tools &amp; Stack
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {visibleTools.map((t) => (
+                      <span
+                        key={t.name}
+                        style={{
+                          backgroundColor: hexToRgba(t.color, 0.1),
+                          color: t.color,
+                          borderColor: hexToRgba(t.color, 0.25),
+                        }}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-mono font-semibold border"
+                      >
+                        {t.name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
           </div>

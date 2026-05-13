@@ -57,12 +57,18 @@ export interface AboutSettings {
   gallery: string[];
 }
 
+export interface ToolItem {
+  name: string;
+  color: string;
+}
+
 export interface SiteSettings {
   profile: ProfileSettings;
   social: SocialSettings;
   hero: HeroSettings;
   seo: SeoSettings;
   about: AboutSettings;
+  tools: ToolItem[];
 }
 
 export type SettingsKey = keyof SiteSettings;
@@ -101,6 +107,16 @@ const DEFAULT_SETTINGS: SiteSettings = {
     experience: [],
     gallery: [],
   },
+  tools: [
+    { name: "Figma",    color: "#FF7262" },
+    { name: "Notion",   color: "#F1F1EF" },
+    { name: "Linear",   color: "#5E6AD2" },
+    { name: "Supabase", color: "#3ECF8E" },
+    { name: "Next.js",  color: "#E2E8F0" },
+    { name: "SQL",      color: "#00E5CC" },
+    { name: "Mixpanel", color: "#7856FF" },
+    { name: "Miro",     color: "#FFD02F" },
+  ],
 };
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
@@ -115,6 +131,7 @@ export async function getSettings(): Promise<SiteSettings> {
     hero: { ...DEFAULT_SETTINGS.hero },
     seo: { ...DEFAULT_SETTINGS.seo },
     about: { ...DEFAULT_SETTINGS.about, body: "", education: [], experience: [], gallery: [] },
+    tools: [...DEFAULT_SETTINGS.tools],
   };
 
   for (const row of data ?? []) {

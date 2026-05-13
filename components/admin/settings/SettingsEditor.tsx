@@ -1,11 +1,20 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Loader2, CheckCheck, Plus, Trash2, GripVertical } from "lucide-react";
+import { Loader2, CheckCheck, Plus, Trash2, GripVertical, Upload } from "lucide-react";
 import { updateSettings } from "@/app/actions/settings";
-import type { SiteSettings, SettingsKey } from "@/app/actions/settings";
+import type { SiteSettings, SettingsKey, ToolItem } from "@/app/actions/settings";
+import { supabase } from "@/lib/supabase";
 import { useToast, ToastContainer } from "@/components/admin/Toast";
 import { cn } from "@/lib/utils";
+
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace("#", "").padEnd(6, "0");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 type Tab = SettingsKey;
 const TABS: { key: Tab; label: string }[] = [
@@ -14,6 +23,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "social",  label: "Social" },
   { key: "hero",    label: "Hero" },
   { key: "seo",     label: "SEO" },
+  { key: "tools",   label: "Tools" },
 ];
 
 type SaveState = "saved" | "saving" | "modified";
@@ -67,11 +77,13 @@ export function SettingsEditor({ initialSettings }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const [settings, setSettings] = useState<SiteSettings>(initialSettings);
   const [saveStates, setSaveStates] = useState<Record<Tab, SaveState>>({
-    profile: "saved", about: "saved", social: "saved", hero: "saved", seo: "saved",
+    profile: "saved", about: "saved", social: "saved", hero: "saved", seo: "saved", tools: "saved",
   });
   const [lastSaved, setLastSaved] = useState<Record<Tab, string | null>>({
-    profile: null, about: null, social: null, hero: null, seo: null,
+    profile: null, about: null, social: null, hero: null, seo: null, tools: null,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toasts, toast, dismiss } = useToast();
   const settingsRef = useRef(settings);
@@ -110,6 +122,31 @@ export function SettingsEditor({ initialSettings }: Props) {
     } catch {
       setSaveStates((prev) => ({ ...prev, [tab]: "modified" }));
       toast({ message: "Save failed", type: "error" });
+    }
+  }
+
+  function setToolsValue(tools: ToolItem[]) {
+    setSettings((prev) => ({ ...prev, tools }));
+    setSaveStates((prev) => ({ ...prev, tools: "modified" }));
+    scheduleSave("tools");
+  }
+
+  async function uploadProfileImage(file: File) {
+    setUploadingImage(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const fileName = `profile-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("profiles")
+        .upload(fileName, file, { upsert: true, contentType: file.type });
+      if (uploadError) throw uploadError;
+      const { data } = supabase.storage.from("profiles").getPublicUrl(fileName);
+      updateField("profile", "profile_image_url", data.publicUrl);
+      toast({ message: "Profile image uploaded" });
+    } catch (err) {
+      toast({ message: err instanceof Error ? err.message : "Upload failed", type: "error" });
+    } finally {
+      setUploadingImage(false);
     }
   }
 
@@ -190,14 +227,52 @@ export function SettingsEditor({ initialSettings }: Props) {
               <Field label="Bio" hint="Short version shown on cards">
                 <Textarea value={p.bio} onChange={(v) => updateField("profile", "bio", v)} placeholder="A short bio…" rows={4} />
               </Field>
-              <Field label="Profile image URL">
-                <Input value={p.profile_image_url} onChange={(v) => updateField("profile", "profile_image_url", v)} placeholder="https://…" type="url" />
-                {p.profile_image_url && (
-                  <div className="mt-2 w-16 h-16 rounded-full overflow-hidden border border-border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.profile_image_url} alt="Profile preview" className="w-full h-full object-cover" />
+              <Field label="Profile image">
+                <div className="flex gap-3 items-start">
+                  {p.profile_image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.profile_image_url}
+                      alt="Profile"
+                      className="w-16 h-16 rounded-2xl object-cover border border-border shrink-0"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-bg-secondary border border-dashed border-border shrink-0 flex items-center justify-center">
+                      <Upload className="w-5 h-5 text-text-muted" />
+                    </div>
+                  )}
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      value={p.profile_image_url}
+                      onChange={(v) => updateField("profile", "profile_image_url", v)}
+                      placeholder="https://… or upload below"
+                      type="url"
+                    />
+                    <button
+                      type="button"
+                      disabled={uploadingImage}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-text-muted text-xs font-mono hover:border-accent-primary/40 hover:text-text-secondary transition-colors disabled:opacity-50"
+                    >
+                      {uploadingImage ? (
+                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</>
+                      ) : (
+                        <><Upload className="w-3.5 h-3.5" /> Upload from computer</>
+                      )}
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void uploadProfileImage(file);
+                        e.target.value = "";
+                      }}
+                    />
                   </div>
-                )}
+                </div>
               </Field>
               <Field label="Location">
                 <Input value={p.location} onChange={(v) => updateField("profile", "location", v)} placeholder="Bengaluru, India" />
@@ -505,6 +580,75 @@ export function SettingsEditor({ initialSettings }: Props) {
               <Field label="Twitter handle" hint="Without @">
                 <Input value={seo.twitter_handle} onChange={(v) => updateField("seo", "twitter_handle", v)} placeholder="thinkinproducts" />
               </Field>
+            </>
+          )}
+
+          {/* ── Tools ── */}
+          {activeTab === "tools" && (
+            <>
+              <p className="text-text-secondary text-sm">
+                Tools and technologies shown in the About section on the homepage.
+              </p>
+              <div className="space-y-2">
+                {settings.tools.map((tool, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={tool.name}
+                      onChange={(e) => {
+                        const next = settings.tools.map((t, j) => j === i ? { ...t, name: e.target.value } : t);
+                        setToolsValue(next);
+                      }}
+                      placeholder="Tool name (e.g. Figma)"
+                      className="flex-1 px-3 py-2 rounded-xl bg-bg-secondary border border-border text-text-primary placeholder:text-text-muted text-sm outline-none focus:border-accent-primary/50 transition-colors"
+                    />
+                    <div className="relative shrink-0" title="Badge colour">
+                      <input
+                        type="color"
+                        value={tool.color}
+                        onChange={(e) => {
+                          const next = settings.tools.map((t, j) => j === i ? { ...t, color: e.target.value } : t);
+                          setToolsValue(next);
+                        }}
+                        className="w-10 h-10 rounded-lg border border-border cursor-pointer p-0.5 bg-bg-secondary"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setToolsValue(settings.tools.filter((_, j) => j !== i))}
+                      className="p-2 rounded-xl border border-border text-text-muted hover:text-rose-400 hover:border-rose-500/30 transition-colors shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setToolsValue([...settings.tools, { name: "", color: "#00E5CC" }])}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-text-muted text-xs font-mono hover:border-accent-primary/40 hover:text-text-secondary transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add tool
+                </button>
+              </div>
+
+              {settings.tools.filter((t) => t.name.trim()).length > 0 && (
+                <div>
+                  <p className="font-mono text-xs text-text-muted uppercase tracking-widest mb-3">Preview</p>
+                  <div className="flex flex-wrap gap-2">
+                    {settings.tools.filter((t) => t.name.trim()).map((t, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          backgroundColor: hexToRgba(t.color, 0.1),
+                          color: t.color,
+                          borderColor: hexToRgba(t.color, 0.25),
+                        }}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-mono font-semibold border"
+                      >
+                        {t.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>

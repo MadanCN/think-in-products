@@ -77,7 +77,7 @@ const fadeUp = {
 export default function HeroSection({ stats }: { stats?: RoadmapStats }) {
   return (
     <section
-      className="relative min-h-screen flex flex-col justify-center overflow-hidden px-6 md:px-16"
+      className="relative min-h-screen flex flex-col justify-center overflow-hidden px-6 md:px-16 pt-16"
       style={{ backgroundColor: "var(--bg-primary, #07080f)" }}
     >
       {/* Three.js canvas background */}
@@ -91,7 +91,7 @@ export default function HeroSection({ stats }: { stats?: RoadmapStats }) {
 
       {/* Content */}
       <motion.div
-        className="relative z-10 max-w-5xl pt-32 pb-24 lg:pt-0 lg:pb-0"
+        className="relative z-10 max-w-5xl pb-16 lg:pb-0"
         variants={container}
         initial="hidden"
         animate="visible"
@@ -111,7 +111,7 @@ export default function HeroSection({ stats }: { stats?: RoadmapStats }) {
         <motion.h1
           variants={fadeUp}
           className="font-display font-extrabold leading-[0.95] tracking-[-0.03em] mb-6"
-          style={{ fontSize: "clamp(3.5rem, 7vw, 7rem)" }}
+          style={{ fontSize: "clamp(2.25rem, 8vw, 7rem)" }}
         >
           <span className="block text-text-primary">Products</span>
           <span className="block text-text-primary">don&rsquo;t fail.</span>

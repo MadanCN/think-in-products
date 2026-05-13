@@ -39,6 +39,7 @@ export default async function HomePage() {
         profile={settings.profile}
         social={settings.social}
         shortBio={shortBio}
+        tools={settings.tools}
       />
 
       <NewsletterSection />
