@@ -132,6 +132,7 @@ export async function toggleCaseFeatured(
     .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/portfolio");
+  revalidatePath("/");
 }
 
 // ─── Public ───────────────────────────────────────────────────────────────────

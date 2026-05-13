@@ -18,6 +18,7 @@ export interface AdminArticle {
   read_time_minutes: number;
   published_at: string | null;
   status: ArticleStatus;
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -65,6 +66,7 @@ export async function createArticle(input: Partial<ArticleInput>): Promise<Admin
     read_time_minutes: calcReadTime(input.content ?? null),
     published_at: input.published_at ?? null,
     status: input.status ?? "draft",
+    is_featured: input.is_featured ?? false,
   };
   const { data, error } = await db
     .from("articles")
@@ -100,7 +102,9 @@ export async function updateArticle(
   if (error) throw new Error(error.message);
   revalidatePath("/admin/articles");
   revalidatePath("/learn");
+  revalidatePath("/");
   const updated = data as AdminArticle;
+  revalidatePath(`/learn/${updated.slug}`);
   const action = input.status === "published" ? "article_published" : "article_updated";
   void logActivity({ action, entity_type: "article", entity_name: updated.title });
   return updated;
@@ -116,7 +120,38 @@ export async function deleteArticle(id: string): Promise<void> {
   void logActivity({ action: "article_deleted", entity_type: "article", entity_name: (row as { title?: string } | null)?.title });
 }
 
+export async function toggleArticleFeatured(
+  id: string,
+  is_featured: boolean
+): Promise<void> {
+  const db = createServerSupabaseClient();
+  const { error } = await db
+    .from("articles")
+    .update({ is_featured, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/articles");
+  revalidatePath("/");
+}
+
 // ─── Public read actions ──────────────────────────────────────────────────────
+
+export async function getFeaturedArticles(): Promise<AdminArticle[]> {
+  try {
+    const db = createServerSupabaseClient();
+    const { data, error } = await db
+      .from("articles")
+      .select("*")
+      .eq("status", "published")
+      .eq("is_featured", true)
+      .order("published_at", { ascending: false })
+      .limit(3);
+    if (error) return [];
+    return (data ?? []) as AdminArticle[];
+  } catch {
+    return [];
+  }
+}
 
 export async function getPublishedArticles(opts?: {
   offset?: number;

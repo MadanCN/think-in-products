@@ -5,14 +5,14 @@ import PortfolioTeaser from "@/components/sections/PortfolioTeaser";
 import AboutSection from "@/components/sections/AboutSection";
 import FeaturedArticles from "@/components/sections/FeaturedArticles";
 import NewsletterSection from "@/components/sections/NewsletterSection";
-import { getPublishedArticles } from "@/app/actions/articles";
+import { getFeaturedArticles } from "@/app/actions/articles";
 import { getPublicPhasesPreview, getRoadmapStats } from "@/app/actions/roadmap";
 import { getPublicFeaturedCases } from "@/app/actions/portfolio";
 import { getSettings } from "@/app/actions/settings";
 
 export default async function HomePage() {
-  const [{ articles }, phases, stats, featuredCases, settings] = await Promise.all([
-    getPublishedArticles({ limit: 3 }),
+  const [articles, phases, stats, featuredCases, settings] = await Promise.all([
+    getFeaturedArticles(),
     getPublicPhasesPreview(),
     getRoadmapStats(),
     getPublicFeaturedCases(),

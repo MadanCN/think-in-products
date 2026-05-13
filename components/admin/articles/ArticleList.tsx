@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Pencil, Trash2, ExternalLink, Star } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "@/components/admin/DataTable";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { useToast, ToastContainer } from "@/components/admin/Toast";
-import { deleteArticle } from "@/app/actions/articles";
+import { deleteArticle, toggleArticleFeatured } from "@/app/actions/articles";
 import type { AdminArticle } from "@/app/actions/articles";
 import type { Column } from "@/components/admin/DataTable";
 import { cn } from "@/lib/utils";
 
-type FilterTab = "all" | "published" | "draft" | "archived";
+type FilterTab = "all" | "published" | "draft" | "archived" | "featured";
 
 const STATUS_STYLE: Record<string, string> = {
   published: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
@@ -34,10 +34,23 @@ export function ArticleList({ initialArticles }: ArticleListProps) {
   const router = useRouter();
 
   const filtered = articles.filter((a) => {
-    const matchesTab = tab === "all" || a.status === tab;
+    const matchesTab =
+      tab === "all" ? true :
+      tab === "featured" ? a.is_featured :
+      a.status === tab;
     const matchesSearch = a.title.toLowerCase().includes(search.toLowerCase());
     return matchesTab && matchesSearch;
   });
+
+  async function handleToggleFeatured(id: string, val: boolean) {
+    setArticles((prev) => prev.map((a) => (a.id === id ? { ...a, is_featured: val } : a)));
+    try {
+      await toggleArticleFeatured(id, val);
+    } catch {
+      setArticles((prev) => prev.map((a) => (a.id === id ? { ...a, is_featured: !val } : a)));
+      toast({ message: "Failed to update featured status", type: "error" });
+    }
+  }
 
   async function handleDelete() {
     if (!confirmDelete) return;
@@ -56,6 +69,7 @@ export function ArticleList({ initialArticles }: ArticleListProps) {
 
   const tabs: { key: FilterTab; label: string }[] = [
     { key: "all", label: `All (${articles.length})` },
+    { key: "featured", label: `Featured (${articles.filter((a) => a.is_featured).length})` },
     { key: "published", label: `Published (${articles.filter((a) => a.status === "published").length})` },
     { key: "draft", label: `Draft (${articles.filter((a) => a.status === "draft").length})` },
     { key: "archived", label: `Archived (${articles.filter((a) => a.status === "archived").length})` },
@@ -148,6 +162,18 @@ export function ArticleList({ initialArticles }: ArticleListProps) {
           className="flex items-center gap-1"
           onClick={(e) => e.stopPropagation()}
         >
+          <button
+            onClick={() => handleToggleFeatured(a.id, !a.is_featured)}
+            title={a.is_featured ? "Remove from featured" : "Mark as featured"}
+            className={cn(
+              "p-1.5 rounded-lg transition-colors",
+              a.is_featured
+                ? "text-amber-400 hover:text-amber-300"
+                : "text-text-muted hover:text-amber-400 hover:bg-amber-500/10"
+            )}
+          >
+            <Star className={cn("w-3.5 h-3.5", a.is_featured && "fill-amber-400")} />
+          </button>
           {a.status === "published" && (
             <a
               href={`/learn/${a.slug}`}
