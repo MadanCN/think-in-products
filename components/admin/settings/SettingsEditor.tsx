@@ -4,7 +4,6 @@ import { useState, useRef, useCallback } from "react";
 import { Loader2, CheckCheck, Plus, Trash2, GripVertical, Upload } from "lucide-react";
 import { updateSettings } from "@/app/actions/settings";
 import type { SiteSettings, SettingsKey, ToolItem } from "@/app/actions/settings";
-import { supabase } from "@/lib/supabase";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast, ToastContainer } from "@/components/admin/Toast";
 import { cn } from "@/lib/utils";
@@ -135,14 +134,14 @@ export function SettingsEditor({ initialSettings }: Props) {
   async function uploadProfileImage(file: File) {
     setUploadingImage(true);
     try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const fileName = `profile-${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("profiles")
-        .upload(fileName, file, { upsert: true, contentType: file.type });
-      if (uploadError) throw uploadError;
-      const { data } = supabase.storage.from("profiles").getPublicUrl(fileName);
-      updateField("profile", "profile_image_url", data.publicUrl);
+      const body = new FormData();
+      body.append("file", file);
+      body.append("folder", "profiles");
+      body.append("bucket", "profiles");
+      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const json = await res.json() as { url?: string; error?: string };
+      if (!res.ok) throw new Error(json.error ?? "Upload failed");
+      updateField("profile", "profile_image_url", json.url!);
       toast({ message: "Profile image uploaded" });
     } catch (err) {
       toast({ message: err instanceof Error ? err.message : "Upload failed", type: "error" });

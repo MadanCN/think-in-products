@@ -2,13 +2,13 @@
 
 import { useRef, useState } from "react";
 import { Upload, Loader2, X } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 interface Props {
   value: string;
   onChange: (url: string) => void;
   folder: string;          // storage path prefix, e.g. "articles", "portfolio"
+  bucket?: string;         // defaults to "media"; use "profiles" for profile images
   aspect?: "wide" | "square"; // preview shape — wide ≈ 16:9, square = 1:1
   placeholder?: string;
   inputClassName?: string;
@@ -18,6 +18,7 @@ export function ImageUpload({
   value,
   onChange,
   folder,
+  bucket = "media",
   aspect = "wide",
   placeholder = "https://…",
   inputClassName,
@@ -28,14 +29,15 @@ export function ImageUpload({
   async function handleFile(file: File) {
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const name = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("media")
-        .upload(name, file, { upsert: false, contentType: file.type });
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("media").getPublicUrl(name);
-      onChange(data.publicUrl);
+      const body = new FormData();
+      body.append("file", file);
+      body.append("folder", folder);
+      body.append("bucket", bucket);
+
+      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const json = await res.json() as { url?: string; error?: string };
+      if (!res.ok) throw new Error(json.error ?? "Upload failed");
+      onChange(json.url!);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Upload failed");
     } finally {
