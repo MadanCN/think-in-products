@@ -5,6 +5,7 @@ import { Loader2, CheckCheck, Plus, Trash2, GripVertical, Upload } from "lucide-
 import { updateSettings } from "@/app/actions/settings";
 import type { SiteSettings, SettingsKey, ToolItem } from "@/app/actions/settings";
 import { supabase } from "@/lib/supabase";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast, ToastContainer } from "@/components/admin/Toast";
 import { cn } from "@/lib/utils";
 
@@ -427,28 +428,24 @@ export function SettingsEditor({ initialSettings }: Props) {
 
               {/* Gallery */}
               <Field label="Gallery" hint="Image URLs shown in a grid on the About page">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {ab.gallery.map((url, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <input
-                        type="url"
-                        value={url}
-                        onChange={(e) => {
-                          const next = ab.gallery.map((u, j) => j === i ? e.target.value : u);
-                          updateField("about", "gallery", next);
-                        }}
-                        placeholder="https://…"
-                        className="flex-1 px-3 py-2 rounded-xl bg-bg-secondary border border-border text-text-primary placeholder:text-text-muted text-sm outline-none focus:border-accent-primary/50 transition-colors"
-                      />
-                      {url && (
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-border shrink-0">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={url} alt="" className="w-full h-full object-cover" />
-                        </div>
-                      )}
+                    <div key={i} className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <ImageUpload
+                          value={url}
+                          onChange={(v) => {
+                            const next = ab.gallery.map((u, j) => j === i ? v : u);
+                            updateField("about", "gallery", next);
+                          }}
+                          folder="gallery"
+                          aspect="square"
+                          placeholder="https://…"
+                        />
+                      </div>
                       <button
                         onClick={() => updateField("about", "gallery", ab.gallery.filter((_, j) => j !== i))}
-                        className="p-2 rounded-xl border border-border text-text-muted hover:text-rose-400 hover:border-rose-500/30 transition-colors shrink-0"
+                        className="mt-0.5 p-2 rounded-xl border border-border text-text-muted hover:text-rose-400 hover:border-rose-500/30 transition-colors shrink-0"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -460,17 +457,6 @@ export function SettingsEditor({ initialSettings }: Props) {
                   >
                     <Plus className="w-3.5 h-3.5" /> Add image
                   </button>
-                  {/* Preview grid */}
-                  {ab.gallery.filter(Boolean).length > 0 && (
-                    <div className="grid grid-cols-4 gap-2 mt-3">
-                      {ab.gallery.filter(Boolean).map((url, i) => (
-                        <div key={i} className="aspect-square rounded-xl overflow-hidden border border-border">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={url} alt="" className="w-full h-full object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </Field>
             </>
@@ -569,13 +555,13 @@ export function SettingsEditor({ initialSettings }: Props) {
                 </div>
               </Field>
               <Field label="OG image URL" hint="1200×630 recommended">
-                <Input value={seo.og_image_url} onChange={(v) => updateField("seo", "og_image_url", v)} placeholder="https://…" type="url" />
-                {seo.og_image_url && (
-                  <div className="mt-2 h-28 rounded-xl overflow-hidden border border-border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={seo.og_image_url} alt="OG image preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
+                <ImageUpload
+                  value={seo.og_image_url}
+                  onChange={(v) => updateField("seo", "og_image_url", v)}
+                  folder="seo"
+                  aspect="wide"
+                  placeholder="https://…"
+                />
               </Field>
               <Field label="Twitter handle" hint="Without @">
                 <Input value={seo.twitter_handle} onChange={(v) => updateField("seo", "twitter_handle", v)} placeholder="thinkinproducts" />

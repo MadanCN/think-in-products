@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ChevronDown, Plus, Trash2, CheckCheck, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { TagInput } from "@/components/admin/TagInput";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast, ToastContainer } from "@/components/admin/Toast";
 import { createCase, updateCase } from "@/app/actions/portfolio";
 import type { AdminCase, CaseInput } from "@/app/actions/portfolio";
@@ -285,24 +286,13 @@ export function CaseStudyEditor({ caseStudy }: CaseStudyEditorProps) {
                 />
               </Field>
 
-              <Field label="Cover image URL" className="col-span-2">
-                <input
-                  type="url"
+              <Field label="Cover image" className="col-span-2">
+                <ImageUpload
                   value={form.cover_image_url}
-                  onChange={(e) => update("cover_image_url", e.target.value)}
-                  placeholder="https://…"
-                  className={INPUT_CLS}
+                  onChange={(url) => update("cover_image_url", url)}
+                  folder="portfolio"
+                  aspect="wide"
                 />
-                {form.cover_image_url && (
-                  <div className="mt-2 h-32 rounded-xl overflow-hidden border border-border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={form.cover_image_url}
-                      alt="Cover preview"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
               </Field>
 
               <Field label="Figma URL" className="col-span-2">

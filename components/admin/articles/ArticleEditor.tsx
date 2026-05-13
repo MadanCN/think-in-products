@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Clock, CheckCheck, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { TagInput } from "@/components/admin/TagInput";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { useToast, ToastContainer } from "@/components/admin/Toast";
 import { createArticle, updateArticle } from "@/app/actions/articles";
 import type { AdminArticle, ArticleInput } from "@/app/actions/articles";
@@ -339,24 +340,13 @@ export function ArticleEditor({ article }: ArticleEditorProps) {
               </div>
             </Field>
 
-            <Field label="Cover image URL">
-              <input
-                type="url"
+            <Field label="Cover image">
+              <ImageUpload
                 value={form.cover_image}
-                onChange={(e) => update("cover_image", e.target.value)}
-                placeholder="https://…"
-                className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border text-text-primary placeholder:text-text-muted text-sm outline-none focus:border-accent-primary/50 transition-colors"
+                onChange={(url) => update("cover_image", url)}
+                folder="articles"
+                aspect="wide"
               />
-              {form.cover_image && (
-                <div className="mt-2 h-28 rounded-xl overflow-hidden border border-border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={form.cover_image}
-                    alt="Cover preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
             </Field>
 
             <Field label="Tags">
