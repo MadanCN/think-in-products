@@ -1,89 +1,122 @@
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui";
 import { Button } from "@/components/ui";
+import { getSettings } from "@/app/actions/settings";
+import AuthorSection from "@/components/about/AuthorSection";
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Why Think in Products exists, who it's for, and the philosophy behind how we teach product management.",
+    "Why Think in Products exists — a startup PM's learning journal, built in public for anyone on the same journey.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const settings = await getSettings();
+  const { profile, social, about } = settings;
+
+  const headline   = about.headline    || "About Think in Products";
+  const subheadline = about.subheadline || "A structured learning space for aspiring and practising product managers.";
+
+  // Parse body into paragraphs (simple split on blank lines)
+  const bodyParagraphs = about.body
+    ? about.body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+    : [];
+
   return (
     <div className="min-h-screen pt-32 pb-24 px-6">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="mb-16 space-y-4">
+      <div className="max-w-4xl mx-auto space-y-20">
+
+        {/* ── Hero ── */}
+        <section className="space-y-6">
           <Badge variant="outline" className="font-mono text-accent-primary border-accent-primary/30">
-            Our Why
+            About
           </Badge>
-          <h1 className="font-display text-4xl md:text-5xl font-bold text-text-primary">
-            About Think in Products
-          </h1>
-        </div>
 
-        {/* Main content */}
-        <div className="prose prose-invert max-w-none space-y-10">
-          <section className="space-y-4">
-            <h2 className="font-display text-2xl font-bold text-text-primary">
-              The problem with PM education
-            </h2>
-            <p className="text-text-secondary leading-relaxed">
-              Most PM content sits at two useless extremes: vague think-pieces about &ldquo;shipping great products&rdquo; with no actionable depth, or 40-hour video courses packed with frameworks you&rsquo;ll never use. Neither builds the real skill.
-            </p>
-            <p className="text-text-secondary leading-relaxed">
-              Real product thinking is learned by doing, reflecting, and doing again. The gap isn&rsquo;t knowledge — it&rsquo;s structured practice and honest feedback on your reasoning.
-            </p>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="font-display text-2xl font-bold text-text-primary">
-              What this is
-            </h2>
-            <p className="text-text-secondary leading-relaxed">
-              Think in Products is a curated learning environment for PMs who want to think more clearly about product work. The roadmap is structured, the articles go deep, and the case studies show the full messy reality — not just the after-shot.
-            </p>
-            <p className="text-text-secondary leading-relaxed">
-              Everything here is opinionated. You won&rsquo;t find hedged, balanced-for-SEO content. You&rsquo;ll find a point of view, the reasoning behind it, and the humility to say when something didn&rsquo;t work.
-            </p>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="font-display text-2xl font-bold text-text-primary">
-              Who it&rsquo;s for
-            </h2>
-            <ul className="space-y-3">
-              {[
-                "Aspiring PMs who want a structured path into the role — not just a list of books",
-                "Early-career PMs (0–3 years) who want to level up their thinking and work quality",
-                "Engineers and designers transitioning into product roles",
-                "Anyone who cares about building things that actually matter to users",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3 text-text-secondary">
-                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent-primary shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="font-display text-2xl font-bold text-text-primary">
-              Stay in the loop
-            </h2>
-            <p className="text-text-secondary leading-relaxed">
-              New content drops every two weeks. No noise — just the piece and why it matters. Subscribe below or reach out if you want to collaborate.
-            </p>
-            <div className="flex gap-3 pt-2">
-              <Button variant="primary" href="/roadmap">
-                Start the Roadmap
-              </Button>
-              <Button variant="ghost" href="mailto:hello@thinkinproducts.com">
-                Get in Touch
-              </Button>
+          <div className="flex items-start gap-5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Think in Products logo" className="w-16 h-16 object-contain shrink-0 mt-1" />
+            <div className="space-y-3">
+              <h1 className="font-display text-4xl md:text-5xl font-bold text-text-primary">
+                {headline}
+              </h1>
+              <p className="text-text-secondary text-lg leading-relaxed max-w-2xl">
+                {subheadline}
+              </p>
             </div>
+          </div>
+
+          {/* Author callout */}
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <AuthorSection
+              profile={profile}
+              social={social}
+              education={about.education}
+              experience={about.experience}
+              gallery={about.gallery}
+            />
+          </div>
+        </section>
+
+        {/* ── Body content (from settings or fallback) ── */}
+        {bodyParagraphs.length > 0 ? (
+          <section className="prose prose-invert max-w-none space-y-5">
+            {bodyParagraphs.map((para, i) => (
+              <p key={i} className="text-text-secondary leading-relaxed text-base">
+                {para}
+              </p>
+            ))}
           </section>
-        </div>
+        ) : (
+          <div className="space-y-12">
+            <section className="space-y-4">
+              <h2 className="font-display text-2xl font-bold text-text-primary">
+                What this is
+              </h2>
+              <p className="text-text-secondary leading-relaxed">
+                Think in Products is my personal documentation of the PM craft — built as I learn it. I&rsquo;m a Product Executive at a startup with about two years in product, and this is where I write down what I&rsquo;m figuring out.
+              </p>
+              <p className="text-text-secondary leading-relaxed">
+                Not expert advice. Not a course. Just honest notes from someone working through the same challenges you are — what I tested, what worked, what completely fell apart, and what I&rsquo;d do differently.
+              </p>
+            </section>
+
+            <section className="space-y-4">
+              <h2 className="font-display text-2xl font-bold text-text-primary">
+                Why I built it
+              </h2>
+              <p className="text-text-secondary leading-relaxed">
+                I found most PM content either too abstract to act on or too generic to be useful. I wanted something that reflected real startup product work — the messy decisions, the constraints, the trade-offs that don&rsquo;t show up in frameworks.
+              </p>
+              <p className="text-text-secondary leading-relaxed">
+                Writing it down forces clarity. And if it helps someone else along the way, even better.
+              </p>
+            </section>
+
+            <section className="space-y-4">
+              <h2 className="font-display text-2xl font-bold text-text-primary">
+                Who it&rsquo;s for
+              </h2>
+              <p className="text-text-secondary leading-relaxed">
+                Mostly for myself — but also for anyone early in their product career who wants real notes over polished theory. If you&rsquo;re learning as you go, you&rsquo;re in the right place.
+              </p>
+            </section>
+          </div>
+        )}
+
+        {/* ── CTA ── */}
+        <section className="border-t border-border pt-10 space-y-4">
+          <h2 className="font-display text-2xl font-bold text-text-primary">Follow along</h2>
+          <p className="text-text-secondary leading-relaxed">
+            I publish notes as I learn — no noise, just what I actually found useful and why.
+          </p>
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Button variant="primary" href="/roadmap">Start the Roadmap</Button>
+            <Button variant="ghost" href="/contact">Get in Touch</Button>
+          </div>
+        </section>
+
       </div>
     </div>
   );

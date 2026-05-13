@@ -3,33 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Clock } from "lucide-react";
 import { Card, Badge, Button } from "@/components/ui";
-
-const articles = [
-  {
-    title: "How to Run a Discovery Sprint Without Annoying Engineers",
-    excerpt: "Discovery is a team sport. Here's how to involve engineers early and avoid the throw-it-over-the-wall anti-pattern.",
-    tags: ["discovery", "engineering"],
-    readTime: 8,
-    difficulty: "intermediate",
-    slug: "discovery-sprint-without-annoying-engineers",
-  },
-  {
-    title: "The Prioritisation Trap",
-    excerpt: "RICE, MoSCoW, WSJF — we have plenty of frameworks. What we lack is honest conversations about trade-offs.",
-    tags: ["prioritisation", "strategy"],
-    readTime: 6,
-    difficulty: "intermediate",
-    slug: "prioritisation-trap-frameworks",
-  },
-  {
-    title: "The PRD Is a Conversation, Not a Contract",
-    excerpt: "The best PRDs are written to surface disagreements before they become expensive. Here's how to write for alignment.",
-    tags: ["writing", "alignment"],
-    readTime: 5,
-    difficulty: "beginner",
-    slug: "writing-for-alignment-prd",
-  },
-];
+import type { AdminArticle } from "@/app/actions/articles";
 
 const difficultyColors: Record<string, string> = {
   beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -37,7 +11,13 @@ const difficultyColors: Record<string, string> = {
   advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
 };
 
-export default function FeaturedArticles() {
+interface Props {
+  articles: AdminArticle[];
+}
+
+export default function FeaturedArticles({ articles }: Props) {
+  if (articles.length === 0) return null;
+
   return (
     <section className="py-24 px-6 bg-bg-secondary/30">
       <div className="max-w-6xl mx-auto">
@@ -90,7 +70,7 @@ export default function FeaturedArticles() {
                 <p className="text-text-secondary text-sm leading-relaxed">{article.excerpt}</p>
                 <div className="flex items-center gap-1.5 text-text-muted">
                   <Clock className="w-3 h-3" />
-                  <span className="font-mono text-xs">{article.readTime} min read</span>
+                  <span className="font-mono text-xs">{article.read_time_minutes} min read</span>
                 </div>
               </Card>
             </motion.div>

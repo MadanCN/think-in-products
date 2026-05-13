@@ -8,8 +8,11 @@ import {
   Map,
   FileText,
   Briefcase,
+  Users,
+  Send,
   Mail,
   Settings,
+  ClipboardList,
   ExternalLink,
   LogOut,
 } from "lucide-react";
@@ -19,6 +22,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ElementType;
+  exact?: boolean;
 }
 
 interface NavSection {
@@ -39,13 +43,16 @@ const navSections: NavSection[] = [
   {
     label: "Audience",
     items: [
-      { label: "Newsletter", href: "/admin/newsletter", icon: Mail },
+      { label: "Subscribers", href: "/admin/newsletter", icon: Users, exact: true },
+      { label: "Broadcast", href: "/admin/newsletter/broadcast", icon: Send },
+      { label: "Welcome Email", href: "/admin/newsletter/welcome", icon: Mail },
     ],
   },
   {
     label: "Settings",
     items: [
       { label: "Site Settings", href: "/admin/settings", icon: Settings },
+      { label: "Audit Log", href: "/admin/audit-log", icon: ClipboardList },
     ],
   },
 ];
@@ -76,7 +83,9 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
   return (
     <aside className="fixed top-0 left-0 h-screen w-60 border-r border-border flex flex-col bg-bg-secondary/40 z-40">
       {/* Brand */}
-      <div className="h-14 flex items-center px-5 border-b border-border shrink-0">
+      <div className="h-14 flex items-center px-4 border-b border-border shrink-0 gap-2.5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="" className="w-7 h-7 object-contain shrink-0" aria-hidden="true" />
         <span className="font-display font-bold text-sm">
           <span className="text-accent-primary">tip</span>
           <span className="text-text-muted">.</span>
@@ -92,9 +101,10 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
               {section.label}
             </p>
             <ul className="space-y-0.5">
-              {section.items.map(({ label, href, icon: Icon }) => {
-                const active =
-                  pathname === href || pathname.startsWith(href + "/");
+              {section.items.map(({ label, href, icon: Icon, exact }) => {
+                const active = exact
+                  ? pathname === href
+                  : pathname === href || pathname.startsWith(href + "/");
                 return (
                   <li key={href}>
                     <Link
@@ -115,6 +125,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
             </ul>
           </div>
         ))}
+
       </nav>
 
       {/* Bottom — user + logout */}

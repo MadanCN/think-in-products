@@ -1,202 +1,176 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button, Badge } from "@/components/ui";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import type { RoadmapStats } from "@/app/actions/roadmap";
 
-// Loaded only client-side — Three.js must never run on the server
-const HeroScene = dynamic(() => import("@/components/3d/HeroScene"), {
-  ssr: false,
-  loading: () => <SceneLoader />,
-});
+const HeroCanvas = dynamic(() => import("@/components/3d/HeroCanvas"), { ssr: false });
 
-// ─── CSS spinner shown while canvas bootstraps ────────────────
-function SceneLoader() {
+// ─── Scroll indicator (animated drop-line, matches reference) ─
+function ScrollHint() {
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div className="w-8 h-8 rounded-full border-2 border-accent-primary/20 border-t-accent-primary animate-spin" />
-    </div>
-  );
-}
-
-// ─── Static fallback for mobile (no WebGL overhead) ──────────
-function StaticMesh() {
-  return (
-    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-      <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-accent-primary/6 blur-[120px] animate-pulse-glow" />
-      <div
-        className="absolute bottom-[-5%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-accent-secondary/7 blur-[100px] animate-pulse-glow"
-        style={{ animationDelay: "1.5s" }}
-      />
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vw] rounded-full bg-accent-primary/4 blur-[80px] animate-pulse-glow"
-        style={{ animationDelay: "3s" }}
-      />
-    </div>
-  );
-}
-
-// ─── Scroll indicator ─────────────────────────────────────────
-function ScrollIndicator() {
-  return (
-    <motion.div
-      className="flex flex-col items-center gap-1.5"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 1.8, duration: 0.6 }}
-    >
-      <span className="font-mono text-2xs text-text-muted tracking-widest uppercase">
-        scroll
+    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+      <span
+        className="font-mono text-[0.7rem] tracking-[0.14em] uppercase"
+        style={{ color: "var(--color-text-muted, #7a7d94)" }}
+      >
+        Scroll
       </span>
       <motion.div
-        animate={{ y: [0, 6, 0] }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <ChevronDown className="w-5 h-5 text-text-muted" strokeWidth={1.5} />
-      </motion.div>
-    </motion.div>
+        className="w-px bg-gradient-to-b from-current to-transparent"
+        style={{ height: 50, color: "var(--color-text-muted, #7a7d94)", originY: 0 }}
+        animate={{ scaleY: [0, 1, 1, 0] }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut",
+          times: [0, 0.5, 0.51, 1],
+        }}
+      />
+    </div>
   );
 }
 
-// ─── Stats bar ────────────────────────────────────────────────
-function StatsBar() {
-  const stats = ["16 Topics", "60+ Resources", "Free Forever"];
+// ─── Stats block — absolute bottom-right (matches reference) ──
+function HeroStats({ stats }: { stats?: RoadmapStats }) {
+  const items = [
+    ...(stats?.nodeCount    ? [{ value: String(stats.nodeCount),       label: "Topics"    }] : []),
+    ...(stats?.resourceCount ? [{ value: `${stats.resourceCount}+`,    label: "Resources" }] : []),
+    { value: "Free", label: "Forever" },
+  ];
 
   return (
-    <motion.div
-      className="w-full border-t border-border/40"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 1.4, duration: 0.6 }}
-    >
-      <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-center gap-0">
-        {stats.map((stat, i) => (
-          <span key={stat} className="flex items-center">
-            <span className="font-mono text-sm text-text-secondary px-6">{stat}</span>
-            {i < stats.length - 1 && (
-              <span className="w-px h-4 bg-accent-primary/30 shrink-0" />
-            )}
-          </span>
-        ))}
-      </div>
-    </motion.div>
+    <div className="absolute right-16 bottom-16 z-10 hidden lg:flex flex-col gap-6 items-end">
+      {items.map(({ value, label }) => (
+        <div key={label} className="text-right">
+          <p
+            className="font-display font-extrabold leading-none"
+            style={{ fontSize: "clamp(1.8rem, 2.5vw, 2.4rem)", color: "var(--color-text-primary, #e8e9f0)" }}
+          >
+            {value}
+          </p>
+          <p
+            className="font-mono uppercase tracking-[0.08em] mt-1"
+            style={{ fontSize: "0.72rem", color: "var(--color-text-muted, #7a7d94)" }}
+          >
+            {label}
+          </p>
+        </div>
+      ))}
+    </div>
   );
 }
 
 // ─── Stagger variants ─────────────────────────────────────────
 const container = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
 };
-const item = {
-  hidden: { opacity: 0, y: 22 },
+const fadeUp = {
+  hidden:  { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
 };
 
-// ─── Main export ──────────────────────────────────────────────
-export default function HeroSection() {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
-
+// ─── Main ─────────────────────────────────────────────────────
+export default function HeroSection({ stats }: { stats?: RoadmapStats }) {
   return (
-    <div className="flex flex-col">
-      {/* ── Full-viewport hero ── */}
-      <section className="relative min-h-screen flex flex-col overflow-hidden">
+    <section
+      className="relative min-h-screen flex flex-col justify-center overflow-hidden px-6 md:px-16"
+      style={{ backgroundColor: "var(--bg-primary, #07080f)" }}
+    >
+      {/* Three.js canvas background */}
+      <HeroCanvas />
 
-        {/* Background layer: 3D canvas on desktop, static mesh on mobile */}
-        <div className="absolute inset-0 z-0">
-          {isDesktop ? (
-            <Suspense fallback={<SceneLoader />}>
-              <HeroScene />
-            </Suspense>
-          ) : (
-            <StaticMesh />
-          )}
-        </div>
+      {/* Subtle noise overlay — matches reference feel */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ zIndex: 1, backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")", opacity: 0.35 }}
+      />
 
-        {/* Radial vignette — keeps text readable against the 3D scene */}
-        <div
-          className="absolute inset-0 z-[1] pointer-events-none"
-          aria-hidden="true"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 60% at 50% 50%, transparent 30%, rgba(8,12,20,0.55) 100%)",
-          }}
-        />
-
-        {/* Bottom fade into next section */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-40 z-[1] pointer-events-none"
-          aria-hidden="true"
-          style={{
-            background: "linear-gradient(to top, #080C14 0%, transparent 100%)",
-          }}
-        />
-
-        {/* ── Centred content overlay ── */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pt-24 pb-12">
-          <motion.div
-            className="text-center max-w-3xl mx-auto space-y-7"
-            variants={container}
-            initial="hidden"
-            animate="visible"
+      {/* Content */}
+      <motion.div
+        className="relative z-10 max-w-5xl pt-32 pb-24 lg:pt-0 lg:pb-0"
+        variants={container}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Badge */}
+        <motion.div variants={fadeUp} className="mb-8">
+          <Badge
+            variant="solid"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs"
           >
-            {/* Eyebrow badge */}
-            <motion.div variants={item}>
-              <Badge
-                variant="solid"
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse" />
-                Product Management · Learning · Portfolio
-              </Badge>
-            </motion.div>
+            <span className="w-[6px] h-[6px] rounded-full bg-accent-primary animate-pulse" />
+            Learning in Public · Startup PM · Documentation
+          </Badge>
+        </motion.div>
 
-            {/* Headline */}
-            <motion.h1
-              variants={item}
-              className="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-text-primary leading-[1.06] text-balance"
-            >
-              Think Like a<br />
-              <span className="text-accent-primary text-glow">
-                Product Manager.
-              </span>
-            </motion.h1>
+        {/* Headline — mixed typography, exactly like reference */}
+        <motion.h1
+          variants={fadeUp}
+          className="font-display font-extrabold leading-[0.95] tracking-[-0.03em] mb-6"
+          style={{ fontSize: "clamp(3.5rem, 7vw, 7rem)" }}
+        >
+          <span className="block text-text-primary">Products</span>
+          <span className="block text-text-primary">don&rsquo;t fail.</span>
+          <span className="block italic text-accent-primary">Assumptions</span>
+          <span className="block text-text-muted">do.</span>
+        </motion.h1>
 
-            {/* Sub-headline */}
-            <motion.p
-              variants={item}
-              className="text-text-secondary text-lg md:text-xl leading-relaxed max-w-xl mx-auto text-balance"
-            >
-              A no-fluff roadmap to PM fundamentals. Built by a PM, for aspiring PMs.
-            </motion.p>
+        {/* Sub */}
+        <motion.p
+          variants={fadeUp}
+          className="text-text-secondary leading-[1.75] mb-12 font-light"
+          style={{ fontSize: "1.05rem", maxWidth: "480px", fontWeight: 300 }}
+        >
+          Real notes from a startup PM — what I&rsquo;m learning, testing, and
+          documenting as I go.
+        </motion.p>
 
-            {/* CTAs */}
-            <motion.div
-              variants={item}
-              className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1"
-            >
-              <Button variant="primary" size="lg" href="/roadmap">
-                Explore Roadmap
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="lg" href="/portfolio">
-                See My Work
-              </Button>
-            </motion.div>
+        {/* CTAs */}
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start gap-4">
+          <Button variant="primary" size="lg" href="/roadmap">
+            Explore Roadmap
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="lg" href="/portfolio">
+            See My Work
+          </Button>
+        </motion.div>
+
+        {/* Mobile stats row */}
+        {stats && (stats.nodeCount > 0 || stats.resourceCount > 0) && (
+          <motion.div
+            variants={fadeUp}
+            className="lg:hidden flex items-center gap-8 mt-12 pt-8 border-t border-border/40"
+          >
+            {stats.nodeCount > 0 && (
+              <div>
+                <p className="font-display text-2xl font-extrabold text-text-primary">{stats.nodeCount}</p>
+                <p className="font-mono text-xs text-text-muted uppercase tracking-wider">Topics</p>
+              </div>
+            )}
+            {stats.resourceCount > 0 && (
+              <div>
+                <p className="font-display text-2xl font-extrabold text-text-primary">{stats.resourceCount}+</p>
+                <p className="font-mono text-xs text-text-muted uppercase tracking-wider">Resources</p>
+              </div>
+            )}
+            <div>
+              <p className="font-display text-2xl font-extrabold text-accent-primary">Free</p>
+              <p className="font-mono text-xs text-text-muted uppercase tracking-wider">Forever</p>
+            </div>
           </motion.div>
-        </div>
+        )}
+      </motion.div>
 
-        {/* Scroll cue */}
-        <div className="relative z-10 flex justify-center pb-10">
-          <ScrollIndicator />
-        </div>
-      </section>
+      {/* Stats — desktop bottom-right */}
+      <HeroStats stats={stats} />
 
-      {/* ── Stats bar (below the fold) ── */}
-      <StatsBar />
-    </div>
+      {/* Scroll indicator — bottom-center */}
+      <ScrollHint />
+    </section>
   );
 }

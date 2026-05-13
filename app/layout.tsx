@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const syne = Syne({
@@ -55,15 +56,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
+      className={`dark ${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
       <body className="font-body bg-bg-primary text-text-primary">
-        {/* Animated mesh gradient */}
-        <div className="bg-mesh" aria-hidden="true" />
-        {/* Film grain overlay */}
-        <div className="grain-overlay" aria-hidden="true" />
-        {/* Page content sits above overlays */}
-        <div className="relative z-10">{children}</div>
+        <ThemeProvider>
+          {/* Animated mesh gradient */}
+          <div className="bg-mesh" aria-hidden="true" />
+          {/* Film grain overlay */}
+          <div className="grain-overlay" aria-hidden="true" />
+          {/* Page content sits above overlays */}
+          <div className="relative z-10">{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   );

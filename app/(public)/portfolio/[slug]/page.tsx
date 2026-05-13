@@ -177,10 +177,10 @@ export default async function CaseStudyPage({
             </header>
 
             {/* Metrics bar */}
-            {c.metrics.length > 0 && (
+            {(c.metrics ?? []).length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
-                {c.metrics.map((m) => (
-                  <MetricCard key={m.label} label={m.label} value={m.value} />
+                {(c.metrics ?? []).map((m, i) => (
+                  <MetricCard key={`${m.label}-${i}`} label={m.label} value={m.value} />
                 ))}
               </div>
             )}

@@ -7,7 +7,7 @@ import RoadmapClient from "@/components/roadmap/RoadmapClient";
 export const metadata: Metadata = {
   title: "PM Roadmap",
   description:
-    "A structured, phase-by-phase path to becoming a product manager — from foundations to advanced strategy. Each module is focused, opinionated, and built for real skill development.",
+    "My structured notes on product work — documented as I learn. Each module covers what I've tested and found useful, built in public for anyone on the same journey.",
 };
 
 // Revalidate once per hour — roadmap changes infrequently
@@ -40,7 +40,7 @@ export default async function RoadmapPage() {
       <div className="max-w-5xl mx-auto px-6 pt-32 pb-12">
         <div className="space-y-5 max-w-2xl">
           <Badge variant="solid" className="font-mono">
-            Living Document · Updated Regularly
+            Living Document · Built in Public
           </Badge>
 
           <h1 className="font-display text-4xl md:text-5xl font-extrabold text-text-primary tracking-tight">
@@ -48,9 +48,9 @@ export default async function RoadmapPage() {
           </h1>
 
           <p className="text-text-secondary text-lg leading-relaxed">
-            Four phases. Focused modules. No busywork. Work through them
-            sequentially or jump to whatever you need — each node is a
-            self-contained piece of craft, not a reading list.
+            My structured notes on product work, organised by phase.
+            Each module is what I&rsquo;ve actually learned and tested — not a
+            reading list, a knowledge base built in public as I go.
           </p>
 
           {phases.length > 0 && (

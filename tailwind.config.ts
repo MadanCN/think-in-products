@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,23 +10,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        "bg-primary":   "rgb(var(--color-bg-primary) / <alpha-value>)",
+        "bg-secondary": "rgb(var(--color-bg-secondary) / <alpha-value>)",
+        "bg-card":      "rgb(var(--color-bg-card) / <alpha-value>)",
+        "accent-primary":   "rgb(var(--color-accent-primary) / <alpha-value>)",
+        "accent-secondary": "rgb(var(--color-accent-secondary) / <alpha-value>)",
+        "text-primary":   "rgb(var(--color-text-primary) / <alpha-value>)",
+        "text-secondary": "rgb(var(--color-text-secondary) / <alpha-value>)",
+        "text-muted":     "rgb(var(--color-text-muted) / <alpha-value>)",
+        border: {
+          DEFAULT: "rgb(var(--color-border) / <alpha-value>)",
+          glow: "rgba(var(--color-accent-primary) / 0.3)",
+        },
+        // Legacy nested keys kept for backwards compat (bg.primary etc.)
         bg: {
-          primary: "#080C14",
-          secondary: "#0D1320",
-          card: "#111827",
+          primary:   "rgb(var(--color-bg-primary) / <alpha-value>)",
+          secondary: "rgb(var(--color-bg-secondary) / <alpha-value>)",
+          card:      "rgb(var(--color-bg-card) / <alpha-value>)",
         },
         accent: {
-          primary: "#00E5CC",
-          secondary: "#6366F1",
+          primary:   "rgb(var(--color-accent-primary) / <alpha-value>)",
+          secondary: "rgb(var(--color-accent-secondary) / <alpha-value>)",
         },
         text: {
-          primary: "#F1F5F9",
-          secondary: "#94A3B8",
-          muted: "#475569",
-        },
-        border: {
-          DEFAULT: "#1E293B",
-          glow: "rgba(0, 229, 204, 0.3)",
+          primary:   "rgb(var(--color-text-primary) / <alpha-value>)",
+          secondary: "rgb(var(--color-text-secondary) / <alpha-value>)",
+          muted:     "rgb(var(--color-text-muted) / <alpha-value>)",
         },
       },
       fontFamily: {

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -13,6 +14,7 @@ const NAV_LINKS = [
   { label: "Learn",     href: "/learn"     },
   { label: "Portfolio", href: "/portfolio" },
   { label: "About",     href: "/about"     },
+  { label: "Contact",   href: "/contact"   },
 ];
 
 export default function Navbar() {
@@ -44,11 +46,15 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="font-display text-lg font-bold tracking-tight select-none"
+            className="flex items-center gap-2.5 select-none"
             aria-label="Think In Products — home"
           >
-            <span className="text-accent-primary">Think In</span>
-            <span className="text-text-primary"> Products</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="" className="w-8 h-8 object-contain" aria-hidden="true" />
+            <span className="font-display text-lg font-bold tracking-tight">
+              <span className="text-accent-primary">Think In</span>
+              <span className="text-text-primary"> Products</span>
+            </span>
           </Link>
 
           {/* Desktop nav */}
@@ -79,9 +85,10 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center">
-            <Button variant="primary" size="sm" href="#newsletter">
+          {/* Desktop CTA + theme toggle */}
+          <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/[0.04] transition-colors" />
+            <Button variant="primary" size="sm" href="/#newsletter">
               Subscribe
             </Button>
           </div>
@@ -141,15 +148,18 @@ export default function Navbar() {
                     </Link>
                   );
                 })}
-                <div className="pt-3 pb-1">
+                <div className="pt-3 pb-1 flex flex-col gap-2">
                   <Button
                     variant="primary"
                     size="md"
-                    href="#newsletter"
+                    href="/#newsletter"
                     className="w-full justify-center"
                   >
                     Subscribe to Newsletter
                   </Button>
+                  <div className="flex justify-center pt-1">
+                    <ThemeToggle className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/[0.04] transition-colors" />
+                  </div>
                 </div>
               </nav>
             </motion.div>

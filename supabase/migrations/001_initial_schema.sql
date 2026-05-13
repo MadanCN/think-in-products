@@ -58,20 +58,23 @@ CREATE INDEX idx_roadmap_nodes_tags         ON roadmap_nodes USING gin(tags);
 
 -- 3. articles
 CREATE TABLE IF NOT EXISTS articles (
-  id                    uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  slug                  text        UNIQUE NOT NULL,
-  title                 text        NOT NULL,
-  excerpt               text,
-  content               text,       -- markdown / MDX
-  cover_image_url       text,
-  tags                  text[]      NOT NULL DEFAULT '{}',
-  status                text        NOT NULL DEFAULT 'draft'
-                                    CHECK (status IN ('draft','published','archived')),
-  reading_time_minutes  integer     NOT NULL DEFAULT 5 CHECK (reading_time_minutes > 0),
-  view_count            integer     NOT NULL DEFAULT 0,
-  published_at          timestamptz,
-  created_at            timestamptz NOT NULL DEFAULT now(),
-  updated_at            timestamptz NOT NULL DEFAULT now()
+  id                  uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug                text        UNIQUE NOT NULL,
+  title               text        NOT NULL,
+  excerpt             text,
+  content             text,       -- markdown / MDX
+  cover_image         text,
+  author              text        NOT NULL DEFAULT 'Think in Products',
+  difficulty          text        NOT NULL DEFAULT 'beginner'
+                                  CHECK (difficulty IN ('beginner','intermediate','advanced')),
+  tags                text[]      NOT NULL DEFAULT '{}',
+  status              text        NOT NULL DEFAULT 'draft'
+                                  CHECK (status IN ('draft','published','archived')),
+  read_time_minutes   integer     NOT NULL DEFAULT 5 CHECK (read_time_minutes > 0),
+  view_count          integer     NOT NULL DEFAULT 0,
+  published_at        timestamptz,
+  created_at          timestamptz NOT NULL DEFAULT now(),
+  updated_at          timestamptz NOT NULL DEFAULT now()
 );
 
 COMMENT ON TABLE  articles            IS 'Long-form PM articles and framework breakdowns';

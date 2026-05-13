@@ -87,19 +87,19 @@ export default function NewsletterSection({
           <div className="flex justify-center mb-6">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-accent-primary/30 bg-accent-primary/10 text-accent-primary font-mono text-xs font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse" />
-              PM insights, no filler.
+              Learning in public, one note at a time.
             </span>
           </div>
 
           {/* Headline */}
           <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary text-center leading-tight mb-4">
-            PM insights, no filler.
+            Notes from the product field.
           </h2>
 
           {/* Subtext */}
           <p className="text-text-secondary text-base md:text-lg leading-relaxed text-center mb-10 max-w-lg mx-auto">
-            I write about product thinking, lessons from building health tech, and
-            frameworks that actually work. No spam. Unsubscribe any time.
+            I document what I&rsquo;m learning as a Product Executive — real experiments,
+            startup lessons, and what actually works. No spam. Unsubscribe any time.
           </p>
 
           {/* Form / success state */}
@@ -223,18 +223,20 @@ interface CompactFormProps {
 
 function CompactForm({
   email,
+  name,
   status,
   errorMsg,
   onEmailChange,
+  onNameChange,
   onSubmit,
 }: CompactFormProps) {
   return (
     <div className="w-full">
       <p className="font-display text-sm font-bold text-text-primary mb-1">
-        PM insights, no filler.
+        Notes from the product field.
       </p>
       <p className="font-mono text-xs text-text-muted mb-3">
-        Unsubscribe any time.
+        Startup lessons, documented. Unsubscribe any time.
       </p>
 
       <AnimatePresence mode="wait">
@@ -254,7 +256,7 @@ function CompactForm({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             onSubmit={onSubmit}
-            className="flex gap-2"
+            className="flex flex-col gap-2"
           >
             <input
               type="email"
@@ -264,18 +266,29 @@ function CompactForm({
               required
               aria-label="Email address"
               className={cn(
-                "flex-1 min-w-0 px-3 py-2 rounded-lg bg-bg-secondary border text-text-primary placeholder:text-text-muted",
+                "w-full px-3 py-2 rounded-lg bg-bg-secondary border text-text-primary placeholder:text-text-muted",
                 "text-xs outline-none focus:border-accent-primary/50 transition-colors",
                 status === "error" ? "border-rose-500/50" : "border-border"
+              )}
+            />
+            <input
+              type="text"
+              placeholder="Your name (optional)"
+              value={name}
+              onChange={(e) => onNameChange(e.target.value)}
+              aria-label="Your name (optional)"
+              className={cn(
+                "w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder:text-text-muted",
+                "text-xs outline-none focus:border-accent-primary/50 transition-colors"
               )}
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="shrink-0 px-4 py-2 rounded-lg bg-accent-primary text-bg-primary text-xs font-semibold hover:bg-accent-primary/90 transition-colors disabled:opacity-60"
+              className="w-full py-2 rounded-lg bg-accent-primary text-bg-primary text-xs font-semibold hover:bg-accent-primary/90 transition-colors disabled:opacity-60"
             >
               {status === "loading" ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" />
               ) : (
                 "Subscribe"
               )}

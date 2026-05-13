@@ -5,17 +5,63 @@
 /* ── Google Fonts are loaded via next/font in layout.tsx ── */
 
 @layer base {
+  /* ── Dark mode (default) ── */
   :root {
-    --bg-primary: #080C14;
+    /* Space-separated RGB for Tailwind opacity modifiers */
+    --color-bg-primary:      8 12 20;
+    --color-bg-secondary:    13 19 32;
+    --color-bg-card:         17 24 39;
+    --color-accent-primary:  0 229 204;
+    --color-accent-secondary: 99 102 241;
+    --color-text-primary:    241 245 249;
+    --color-text-secondary:  148 163 184;
+    --color-text-muted:      71 85 105;
+    --color-border:          30 41 59;
+
+    /* Legacy hex vars (used by custom CSS utilities) */
+    --bg-primary:   #080C14;
     --bg-secondary: #0D1320;
-    --bg-card: #111827;
-    --accent-primary: #00E5CC;
+    --bg-card:      #111827;
+    --accent-primary:   #00E5CC;
     --accent-secondary: #6366F1;
-    --text-primary: #F1F5F9;
+    --text-primary:   #F1F5F9;
     --text-secondary: #94A3B8;
-    --text-muted: #475569;
-    --border: #1E293B;
-    --border-glow: rgba(0, 229, 204, 0.3);
+    --text-muted:     #475569;
+    --border:         #1E293B;
+    --border-glow:    rgba(0, 229, 204, 0.3);
+
+    /* Mesh gradient colours for dark mode */
+    --mesh-color-1: rgba(0, 229, 204, 0.06);
+    --mesh-color-2: rgba(99, 102, 241, 0.07);
+  }
+
+  /* ── Light mode overrides ── */
+  html.light {
+    --color-bg-primary:      248 250 252;
+    --color-bg-secondary:    241 245 249;
+    --color-bg-card:         255 255 255;
+    --color-accent-primary:  0 168 150;
+    --color-accent-secondary: 99 102 241;
+    --color-text-primary:    15 23 42;
+    --color-text-secondary:  51 65 85;
+    --color-text-muted:      100 116 139;
+    --color-border:          226 232 240;
+
+    --bg-primary:   #F8FAFC;
+    --bg-secondary: #F1F5F9;
+    --bg-card:      #FFFFFF;
+    --accent-primary:   #00A896;
+    --accent-secondary: #6366F1;
+    --text-primary:   #0F172A;
+    --text-secondary: #334155;
+    --text-muted:     #64748B;
+    --border:         #E2E8F0;
+    --border-glow:    rgba(0, 168, 150, 0.3);
+
+    --mesh-color-1: rgba(0, 168, 150, 0.08);
+    --mesh-color-2: rgba(99, 102, 241, 0.06);
+
+    color-scheme: light;
   }
 
   html {
@@ -30,37 +76,24 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   /* Text selection */
   ::selection {
     background-color: rgba(0, 229, 204, 0.25);
-    color: #F1F5F9;
+    color: var(--text-primary);
   }
 
   /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-  }
-
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-secondary); }
   ::-webkit-scrollbar-thumb {
-    background: rgba(0, 229, 204, 0.3);
+    background: var(--border-glow);
     border-radius: 3px;
   }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 229, 204, 0.55);
-  }
-
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 229, 204, 0.3) var(--bg-secondary);
-  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 204, 0.55); }
+  * { scrollbar-width: thin; scrollbar-color: var(--border-glow) var(--bg-secondary); }
 }
 
 @layer components {
@@ -80,7 +113,7 @@
     height: 900px;
     top: -200px;
     left: -200px;
-    background: radial-gradient(circle, rgba(0, 229, 204, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--mesh-color-1) 0%, transparent 70%);
     animation: meshFloat1 18s ease-in-out infinite alternate;
   }
 
@@ -91,7 +124,7 @@
     height: 700px;
     bottom: -150px;
     right: -100px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.07) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--mesh-color-2) 0%, transparent 70%);
     animation: meshFloat2 22s ease-in-out infinite alternate;
   }
 
@@ -109,30 +142,60 @@
 
   /* Glass card base */
   .glass {
-    background: rgba(17, 24, 39, 0.6);
+    background: rgba(var(--color-bg-card) / 0.6);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(var(--color-border) / 0.3);
   }
 
   /* Teal glow text */
   .text-glow {
-    text-shadow: 0 0 20px rgba(0, 229, 204, 0.4);
+    text-shadow: 0 0 20px rgba(var(--color-accent-primary) / 0.4);
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
+}
+
+/* ── Page-enter transition ───────────────────────────────────────────────── */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+main {
+  animation: page-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Link hover underline slide ─────────────────────────────────────────── */
+.link-hover {
+  position: relative;
+  text-decoration: none;
+}
+.link-hover::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.22s ease;
+}
+.link-hover:hover::after { width: 100%; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes meshFloat1 {
-  0% { transform: translate(0, 0) scale(1); }
+  0%   { transform: translate(0, 0) scale(1); }
   100% { transform: translate(80px, 60px) scale(1.15); }
 }
 
 @keyframes meshFloat2 {
-  0% { transform: translate(0, 0) scale(1); }
+  0%   { transform: translate(0, 0) scale(1); }
   100% { transform: translate(-60px, -80px) scale(1.1); }
 }

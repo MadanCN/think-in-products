@@ -36,8 +36,18 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === "/admin/login";
 
-  // Not authenticated → redirect to login
+  // Server action POSTs carry a Next-Action header — redirecting them returns 501.
+  // Return 401 instead so the client can surface the error properly.
+  const isServerAction = request.headers.has("next-action");
+
+  // Not authenticated → redirect to login (or 401 for server actions)
   if (!isLoginPage && !user) {
+    if (isServerAction) {
+      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     return NextResponse.redirect(url);
