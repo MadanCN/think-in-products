@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const syne = Syne({
@@ -68,6 +69,7 @@ export default function RootLayout({
           {/* Page content sits above overlays */}
           <div className="relative z-10">{children}</div>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
