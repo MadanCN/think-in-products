@@ -33,7 +33,7 @@ function buildWelcomeHtml(opts: {
             <table cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td style="vertical-align:middle;padding-right:10px">
-                  <img src="https://i.postimg.cc/8zMFDKGG/logo.png" alt="" width="32" height="32" style="display:block;width:32px;height:32px;object-fit:contain"/>
+                  <img src="${SITE_URL}/logo.png" alt="" width="32" height="32" style="display:block;width:32px;height:32px;object-fit:contain"/>
                 </td>
                 <td style="vertical-align:middle">
                   <p style="margin:0;font-size:13px;font-weight:700;letter-spacing:0.15em;color:#00A896;font-family:monospace;text-transform:uppercase">Think in Products</p>
