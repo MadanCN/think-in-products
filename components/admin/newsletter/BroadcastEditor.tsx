@@ -749,7 +749,7 @@ export function BroadcastEditor({ broadcasts: initialBroadcasts, activeCount }: 
               onChange={(e) => setConfirmText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && confirmText === "SEND") {
-                  confirmMode === "resend" ? handleResendAll() : handleSendAll();
+                  if (confirmMode === "resend") { handleResendAll(); } else { handleSendAll(); }
                 }
               }}
               placeholder="SEND"

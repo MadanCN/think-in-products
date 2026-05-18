@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
 
       const html = buildWelcomeHtml({ subject, greeting, bodyHtml, unsubUrl });
 
-      const { data, error: sendError } = await resend.emails.send({
+      const { error: sendError } = await resend.emails.send({
         from: FROM_EMAIL,
         to: normalised,
         subject,

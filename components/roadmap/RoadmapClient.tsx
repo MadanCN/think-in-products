@@ -44,7 +44,7 @@ export default function RoadmapClient({ phases }: RoadmapClientProps) {
   const handleComplete = useCallback((nodeId: string) => {
     setCompletedIds((prev) => {
       const next = new Set(prev);
-      next.has(nodeId) ? next.delete(nodeId) : next.add(nodeId);
+      if (next.has(nodeId)) { next.delete(nodeId); } else { next.add(nodeId); }
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next))); } catch { /* ignore */ }
       return next;
     });
