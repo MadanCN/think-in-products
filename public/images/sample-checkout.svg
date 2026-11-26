@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640" font-family="Arial, Helvetica, sans-serif">
+  <rect width="360" height="640" rx="28" fill="#F7FAF4"/>
+  <text x="24" y="56" font-size="24" font-weight="700" fill="#22262B">Your basket</text>
+  <text x="336" y="56" font-size="14" fill="#555C63" text-anchor="end">3 items</text>
+  <g>
+    <rect x="26" y="88" width="56" height="54" rx="12" fill="#FFF6CC"/>
+    <path d="M38 124 C46 138 70 136 74 104 C66 124 50 126 40 118 Z" fill="#F5C518"/>
+    <text x="96" y="110" font-size="16" font-weight="700" fill="#22262B">Bananas</text>
+    <text x="96" y="130" font-size="13" fill="#555C63">1 dozen</text>
+    <text x="336" y="110" font-size="16" font-weight="700" fill="#22262B" text-anchor="end">&#8377;60</text>
+    <text x="336" y="130" font-size="13" fill="#555C63" text-anchor="end">&#8211; 1 +</text>
+  </g>
+  <g>
+    <rect x="26" y="156" width="56" height="54" rx="12" fill="#EAF2FB"/>
+    <path d="M44 168 h20 l4 10 v26 h-28 v-26 z" fill="#FFFFFF" stroke="#8FB7E8" stroke-width="2"/>
+    <rect x="44" y="184" width="24" height="10" fill="#8FB7E8"/>
+    <text x="96" y="178" font-size="16" font-weight="700" fill="#22262B">Toned milk</text>
+    <text x="96" y="198" font-size="13" fill="#555C63">1 litre</text>
+    <text x="336" y="178" font-size="16" font-weight="700" fill="#22262B" text-anchor="end">&#8377;68</text>
+    <text x="336" y="198" font-size="13" fill="#555C63" text-anchor="end">&#8211; 1 +</text>
+  </g>
+  <g>
+    <rect x="26" y="224" width="56" height="54" rx="12" fill="#FBEEDD"/>
+    <path d="M38 262 v-16 c0 -10 8 -12 16 -12 c8 0 16 2 16 12 v16 z" fill="#E0A45E"/>
+    <text x="96" y="246" font-size="16" font-weight="700" fill="#22262B">Whole wheat bread</text>
+    <text x="96" y="266" font-size="13" fill="#555C63">400 g</text>
+    <text x="336" y="246" font-size="16" font-weight="700" fill="#22262B" text-anchor="end">&#8377;45</text>
+    <text x="336" y="266" font-size="13" fill="#555C63" text-anchor="end">&#8211; 1 +</text>
+  </g>
+  <rect x="20" y="292" width="320" height="58" rx="12" fill="none" stroke="#C8102E" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="36" y="316" font-size="15" font-weight="700" fill="#22262B">Add &#8377;26 more for free delivery</text>
+  <rect x="36" y="328" width="288" height="8" rx="4" fill="#E3E8DE"/>
+  <rect x="36" y="328" width="250" height="8" rx="4" fill="#22262B"/>
+  <text x="24" y="386" font-size="14" font-weight="700" fill="#555C63">You might also need</text>
+  <rect x="20" y="396" width="100" height="56" rx="12" fill="#EEF3EA"/>
+  <ellipse cx="70" cy="424" rx="12" ry="16" fill="#FFFFFF" stroke="#D9C9A8" stroke-width="2"/>
+  <rect x="130" y="396" width="100" height="56" rx="12" fill="#EEF3EA"/>
+  <path d="M164 436 l36 -16 v16 z" fill="#F7C948"/>
+  <rect x="240" y="396" width="100" height="56" rx="12" fill="#EEF3EA"/>
+  <ellipse cx="290" cy="424" rx="13" ry="18" fill="#6A994E"/>
+  <circle cx="290" cy="428" r="7" fill="#A0522D"/>
+  <text x="24" y="500" font-size="14" fill="#555C63">Arriving today</text>
+  <text x="336" y="500" font-size="14" font-weight="700" fill="#22262B" text-anchor="end">6&#8211;7 pm</text>
+  <rect x="20" y="558" width="320" height="56" rx="14" fill="#22262B"/>
+  <text x="180" y="592" font-size="18" font-weight="700" fill="#F7FAF4" text-anchor="middle">Pay &#8377;173</text>
+</svg>
