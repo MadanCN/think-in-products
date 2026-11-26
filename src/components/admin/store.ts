@@ -55,6 +55,8 @@ export async function uploadImage(file: File): Promise<string> {
 export type Metrics = {
   local: boolean;
   inbox: { contact: number; pitch: number };
+  comments: { unseen: number; week: number };
+  activeReaders7: number;
   days: string[];
   views: { total30: number; byDay: number[] };
   content: Record<PieceType, { published: number; drafts: number; featured: number; views30: number }>;

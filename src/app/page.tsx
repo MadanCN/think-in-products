@@ -5,6 +5,7 @@ import { Contents } from "@/components/home/Contents";
 import { PieceCard } from "@/components/PieceCard";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { SubscribeForm } from "@/components/SubscribeForm";
+import { HomeWelcome } from "@/components/account/HomeWelcome";
 import { getPublished } from "@/lib/content";
 import { JsonLd, SITE_DESCRIPTION, siteJsonLd } from "@/lib/seo";
 import { SECTIONS, pieceUrl, type Piece } from "@/lib/types";
@@ -35,6 +36,7 @@ export default async function Home() {
     <>
       <JsonLd data={siteJsonLd()} />
       <SiteHeader />
+      <HomeWelcome />
 
       {/* Hero: unchanged */}
       <section id="main" className="wrap" style={{ paddingTop: 72, paddingBottom: 96 }}>

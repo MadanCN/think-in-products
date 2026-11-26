@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { denyUnlessAdmin } from "@/lib/admin-auth";
 import { listInbox, listPieces, serviceClient, viewsSince } from "@/lib/repo";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { unseenCommentCount } from "@/lib/reader";
 import type { PieceType } from "@/lib/types";
 
 const DAYS = 30;
@@ -55,6 +56,8 @@ export async function GET(request: Request) {
   if (!db) {
     return NextResponse.json({
       inbox: await inboxCounts(),
+      comments: { unseen: 0, week: 0 },
+      activeReaders7: 0,
       ...base,
       subscribers: { active: 0, pending: 0, unsubscribed: 0, new30: 0, byDay: days.map(() => 0) },
       accounts: { total: 0, plus: 0, pro: 0 },
@@ -105,8 +108,18 @@ export async function GET(request: Request) {
   const sentOnes = sendStats.filter((s) => s.status === "sent");
   const avg = (k: "openRate" | "clickRate") => (sentOnes.length ? sentOnes.reduce((n, s) => n + s[k], 0) / sentOnes.length : null);
 
+  const since7 = new Date(Date.now() - 7 * 864e5).toISOString();
+  const [inbox, unseen, week, readers] = await Promise.all([
+    inboxCounts(),
+    unseenCommentCount(),
+    db.from("comments").select("id", { count: "exact", head: true }).gte("created_at", since7),
+    db.from("reading_progress").select("user_id").gte("last_read_at", since7),
+  ]);
   return NextResponse.json({
     ...base,
+    inbox,
+    comments: { unseen, week: week.count ?? 0 },
+    activeReaders7: new Set((readers.data ?? []).map((r) => r.user_id)).size,
     subscribers: {
       active: subRows.filter((s) => s.status === "active").length,
       pending: subRows.filter((s) => s.status === "pending").length,

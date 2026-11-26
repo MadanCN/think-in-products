@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, initialMode = "login", error = null }: { next: string; initialMode?: "login" | "signup"; error?: string | null }) {
   const supabase = createClient();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [newsletter, setNewsletter] = useState(false);
+  const [newsletter, setNewsletter] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(error ? { kind: "err", text: error } : null);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const callback = `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
+  const callback = `${origin}/auth/callback?next=${encodeURIComponent(next)}${newsletter ? "&newsletter=1" : ""}`;
 
   if (!supabase) {
     return (
@@ -24,13 +24,10 @@ export function LoginForm({ next }: { next: string }) {
     );
   }
 
-  async function google() {
+  // Runs through our own domain, so Google shows "thinkinproducts.com".
+  function google() {
     setBusy(true);
-    const { error } = await supabase!.auth.signInWithOAuth({ provider: "google", options: { redirectTo: callback } });
-    if (error) {
-      setMsg({ kind: "err", text: error.message });
-      setBusy(false);
-    }
+    window.location.assign(`${window.location.origin}/auth/google?next=${encodeURIComponent(next)}${newsletter ? "&newsletter=1" : ""}`);
   }
 
   async function submit(e: React.FormEvent) {
@@ -40,14 +37,14 @@ export function LoginForm({ next }: { next: string }) {
     if (mode === "login") {
       const { error } = await supabase!.auth.signInWithPassword({ email, password });
       if (error) setMsg({ kind: "err", text: "That email and password don't match. Try again, or use a login link." });
-      else window.location.href = next;
+      else {
+        if (newsletter) await fetch("/api/me/optin", { method: "POST" }).catch(() => null);
+        window.location.href = next;
+      }
     } else {
-      const { error } = await supabase!.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: callback } });
+      const { error } = await supabase!.auth.signUp({ email, password, options: { data: { name, newsletter }, emailRedirectTo: callback } });
       if (error) setMsg({ kind: "err", text: error.message });
       else {
-        if (newsletter) {
-          await fetch("/api/subscribe", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, source: "signup" }) });
-        }
         setMsg({ kind: "ok", text: "Account created. Check your inbox to confirm your email, then log in." });
       }
     }
@@ -84,6 +81,11 @@ export function LoginForm({ next }: { next: string }) {
         <button type="button" aria-pressed={mode === "login"} style={tab(mode === "login")} onClick={() => setMode("login")}>Log in</button>
         <button type="button" aria-pressed={mode === "signup"} style={tab(mode === "signup")} onClick={() => setMode("signup")}>Create account</button>
       </div>
+
+      <label className="nl-check">
+        <input type="checkbox" checked={newsletter} onChange={(e) => setNewsletter(e.target.checked)} />
+        <span>Send me the weekly newsletter. <span className="small">One email a week, unsubscribe any time.</span></span>
+      </label>
 
       {/* Google's "G" mark in its official colours, as Google's sign-in branding guidelines allow. */}
       <button type="button" className="btn" onClick={google} disabled={busy} style={{ width: "100%", background: "var(--white)", gap: 12 }}>
@@ -126,12 +128,6 @@ export function LoginForm({ next }: { next: string }) {
             style={{ minHeight: 50 }}
           />
         </div>
-        {mode === "signup" ? (
-          <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 15, cursor: "pointer" }}>
-            <input type="checkbox" checked={newsletter} onChange={(e) => setNewsletter(e.target.checked)} style={{ width: 20, height: 20, margin: "2px 0 0", accentColor: "var(--red)" }} />
-            Send me the weekly issue (you can change this any time)
-          </label>
-        ) : null}
         <button className="btn btn-red" type="submit" disabled={busy}>{mode === "login" ? "Log in" : "Create account"}</button>
       </form>
 

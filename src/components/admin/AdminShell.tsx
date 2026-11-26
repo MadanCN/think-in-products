@@ -14,6 +14,7 @@ const ICONS: Record<string, React.ReactNode> = {
   breakdown: <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" />,
   newsletter: <path d="M3 6h18v12H3zM3 6l9 7 9-7" />,
   inbox: <path d="M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5" />,
+  comments: <path d="M4 5h16v11H9l-5 4zM8 9h8M8 12h5" />,
   authors: <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1-4 4-6 8-6s7 2 8 6" />,
 };
 
@@ -85,12 +86,13 @@ function IdleGuard({ idleMinutes }: { idleMinutes: number }) {
   );
 }
 
-export function AdminShell({ children, local, unread = 0, idleMinutes = 30 }: { children: React.ReactNode; local: boolean; unread?: number; idleMinutes?: number }) {
+export function AdminShell({ children, local, unread = 0, comments = 0, idleMinutes = 30 }: { children: React.ReactNode; local: boolean; unread?: number; comments?: number; idleMinutes?: number }) {
   const path = usePathname();
   const items = [
     { href: "/admin", label: "Dashboard", icon: "dash" },
     ...SECTION_LIST.map((s) => ({ href: s.adminPath, label: s.type === "newsletter" ? "Newsletters" : s.plural, icon: s.type as string })),
     { href: "/admin/inbox", label: "Inbox", icon: "inbox", badge: unread },
+    { href: "/admin/comments", label: "Comments", icon: "comments", badge: comments },
     { href: "/admin/authors", label: "Authors", icon: "authors" },
   ];
   return (

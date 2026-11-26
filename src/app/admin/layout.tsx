@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { isAdmin } from "@/lib/admin-auth";
 import { listInbox } from "@/lib/repo";
+import { unseenCommentCount } from "@/lib/reader";
 import { IDLE_MS } from "@/lib/security/admin-session";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -18,6 +19,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (BARE.includes(path)) return children;
   // The proxy already checked the session; this is the second lock.
   if (!(await isAdmin())) redirect("/admin/login");
-  const unread = (await listInbox({ status: "new" })).length;
-  return <AdminShell local={!isSupabaseConfigured} unread={unread} idleMinutes={IDLE_MS / 60_000}>{children}</AdminShell>;
+  const [inbox, comments] = await Promise.all([listInbox({ status: "new" }).catch(() => []), unseenCommentCount().catch(() => 0)]);
+  return <AdminShell local={!isSupabaseConfigured} unread={inbox.length} comments={comments} idleMinutes={IDLE_MS / 60_000}>{children}</AdminShell>;
 }

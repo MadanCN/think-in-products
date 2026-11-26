@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { SubscribeForm } from "./SubscribeForm";
+import { AccountMenu, MobileAccountLinks } from "./account/AccountMenu";
 
 type NavKey = "article" | "case_study" | "breakdown" | "newsletter" | "login" | undefined;
 
@@ -25,8 +26,8 @@ export function SiteHeader({ active }: { active?: NavKey }) {
           <Link href="/search" aria-label="Search" className="nav-icon">
             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M20 20l-4.6-4.6" /></svg>
           </Link>
-          <Link href="/login" className={active === "login" ? "active" : undefined} style={{ fontWeight: 700 }}>Log in</Link>
           <Link href="/subscribe" className="btn btn-dark btn-sm">Subscribe</Link>
+          <AccountMenu active={active === "login"} />
         </nav>
         <details className="mobile-nav">
           <summary aria-label="Menu">
@@ -35,7 +36,7 @@ export function SiteHeader({ active }: { active?: NavKey }) {
           <div className="mobile-panel">
             {NAV.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}
             <Link href="/search">Search</Link>
-            <Link href="/login">Log in</Link>
+            <MobileAccountLinks />
             <Link href="/subscribe" className="btn btn-red">Subscribe free</Link>
           </div>
         </details>
@@ -77,7 +78,7 @@ export function SiteFooter() {
             <h2>Account</h2>
             <Link href="/subscribe">Subscribe</Link>
             <Link href="/plans">Plans</Link>
-            <Link href="/login">Log in</Link>
+            <Link href="/account">Your profile</Link>
           </nav>
           <nav aria-label="About">
             <h2>About</h2>

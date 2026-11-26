@@ -18,7 +18,7 @@ export async function renderPieceEmail(piece: Piece, unsubscribeUrl = `${SITE_UR
 export function confirmEmailHtml(confirmUrl: string) {
   return `<!doctype html><html><body style="margin:0;padding:24px;background:#e8efe2;font-family:Segoe UI,Helvetica,Arial,sans-serif;color:#22262b">
 <div style="max-width:520px;margin:0 auto;background:#f7faf4;border:2px solid #22262b;padding:28px">
-<p style="font-size:22px;font-weight:800;margin:0 0 16px">think<span style="color:#c8102e">in</span>product</p>
+<p style="font-size:22px;font-weight:800;margin:0 0 16px">think<span style="color:#c8102e">in</span>products</p>
 <p style="font-size:20px;font-weight:700;margin:0 0 10px">One click and you're in.</p>
 <p style="font-size:16px;margin:0 0 22px">Confirm your email to get the ThinkInProducts newsletter: one issue a week, with the best new articles, case studies and product breakdowns.</p>
 <a href="${confirmUrl}" style="display:inline-block;background:#c8102e;color:#f7faf4;text-decoration:none;font-weight:700;padding:12px 24px;border-radius:999px">Confirm my email</a>

@@ -5,12 +5,14 @@ import { PieceCard } from "@/components/PieceCard";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { SubscribeForm } from "@/components/SubscribeForm";
 import { ViewBeacon } from "@/components/ViewBeacon";
+import { Comments } from "@/components/account/Comments";
+import { ReadTracker } from "@/components/account/ReadTracker";
 import Link from "next/link";
 import { PREVIEW_BLOCKS, canRead, getPublishedPiece, getRelated } from "@/lib/content";
 import { getAuthor } from "@/lib/repo";
 import { JsonLd, pieceJsonLd, pieceMetadata } from "@/lib/seo";
 import { getViewer } from "@/lib/supabase/server";
-import { SECTIONS, type PieceType } from "@/lib/types";
+import { SECTIONS, pieceUrl, type PieceType } from "@/lib/types";
 
 export async function pieceMeta(type: PieceType, slug: string): Promise<Metadata> {
   const piece = await getPublishedPiece(type, slug);
@@ -31,9 +33,11 @@ export async function PiecePage({ type, slug }: { type: PieceType; slug: string 
     <>
       <JsonLd data={pieceJsonLd(piece, author)} />
       <ViewBeacon id={piece.id} />
+      {allowed ? <ReadTracker pieceId={piece.id} /> : null}
       <SiteHeader active={type} />
       <main id="main">
         <PieceView piece={shown} author={author} locked={!allowed} lockedPlan={piece.access} />
+        {type !== "newsletter" ? <Comments pieceId={piece.id} pieceUrl={pieceUrl(piece)} /> : null}
         <section className="wrap" style={{ paddingBottom: 72 }}>
           <div className="col taped" style={{ padding: "clamp(24px, 4vw, 40px)" }}>
             <h2 style={{ margin: "0 0 8px", fontSize: 30, fontWeight: 800, fontStretch: "78%" }}>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { redirect } from "next/navigation";
+import { getReader } from "@/lib/reader";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = { title: "Log in" };
@@ -13,8 +15,18 @@ const REASONS = [
 
 export default async function LoginPage(props: PageProps<"/login">) {
   const sp = await props.searchParams;
-  const raw = typeof sp.next === "string" ? sp.next : "/";
-  const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+  const raw = typeof sp.next === "string" ? sp.next : "/account";
+  const next = raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/login") ? raw : "/account";
+  if (await getReader()) redirect(next);
+  const ERRORS: Record<string, string> = {
+    cancelled: "Google sign-in was cancelled. Try again whenever you're ready.",
+    expired: "That sign-in took too long. Try again.",
+    google: "Google sign-in didn't work. Try again, or use your email.",
+    link: "That login link has expired or was already used. Ask for a new one.",
+    setup: "Login isn't switched on yet.",
+  };
+  const error = typeof sp.error === "string" ? ERRORS[sp.error] ?? null : null;
+  const mode = sp.mode === "signup" ? "signup" : "login";
   return (
     <>
       <header className="site-header">
@@ -44,7 +56,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
           </div>
         </div>
         <div className="taped" style={{ flex: "0 1 460px", minWidth: 0, padding: "clamp(24px, 3.4vw, 40px)" }}>
-          <LoginForm next={next} />
+          <LoginForm next={next} initialMode={mode} error={error} />
         </div>
       </main>
     </>

@@ -55,7 +55,9 @@ export function Dashboard() {
         <Tile label="Unsubscribed" value={m.subscribers.unsubscribed} />
         <Tile label="Accounts" value={m.accounts.total} />
         <Tile label="Paid members" value={m.accounts.plus + m.accounts.pro} note={`${m.accounts.plus} Plus, ${m.accounts.pro} Pro`} />
-        <Tile label="Unread messages" value={m.inbox.contact + m.inbox.pitch} note={`${m.inbox.contact} contact, ${m.inbox.pitch} pitches`} href="/admin/inbox" />
+        <Tile label="Unread messages" value={(m.inbox?.contact ?? 0) + (m.inbox?.pitch ?? 0)} note={`${m.inbox?.contact ?? 0} contact, ${m.inbox?.pitch ?? 0} pitches`} href="/admin/inbox" />
+        <Tile label="New comments" value={m.comments?.unseen ?? 0} note={`${m.comments?.week ?? 0} in the last 7 days`} href="/admin/comments" />
+        <Tile label="Readers this week" value={m.activeReaders7 ?? 0} note="Signed in and read something" />
       </div>
       <div className="panels">
         <section className="panel">
