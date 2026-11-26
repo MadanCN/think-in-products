@@ -1,3 +1,4 @@
+import { SUBSCRIBED_BOOT } from "@/lib/subscribed-flag";
 import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/bricolage-grotesque/wdth.css";
 import "@fontsource/kalam/400.css";
@@ -23,7 +24,10 @@ export const viewport: Viewport = { themeColor: "#E8EFE2", width: "device-width"
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SUBSCRIBED_BOOT }} />
+      </head>
       <body>
         <a href="#main" className="skip-link">Skip to content</a>
         {children}

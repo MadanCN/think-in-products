@@ -32,7 +32,7 @@ export default function SubscribePage() {
             ))}
           </ul>
           <SubscribeForm source="subscribe-page" cta="Subscribe free" />
-          <p style={{ margin: "14px 0 0", fontSize: 15, color: "var(--ink-3)" }}>
+          <p className="when-unsub" style={{ margin: "14px 0 0", fontSize: 15, color: "var(--ink-3)" }}>
             You&apos;ll get a confirmation email first. Unsubscribe from any email in one click. <Link href="/newsletter">Read the latest issue</Link>.
           </p>
         </div>

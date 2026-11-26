@@ -11,7 +11,9 @@ const noStore = { "Cache-Control": "private, no-store" };
 export async function GET() {
   const r = await getReader();
   if (!r) return NextResponse.json({ signedIn: false }, { headers: noStore });
-  return NextResponse.json({ signedIn: true, id: r.id, name: r.name, avatar: r.avatar, email: r.email }, { headers: noStore });
+  const db = serviceClient();
+  const { data: sub } = db && r.email ? await db.from("subscribers").select("status").eq("email", r.email.toLowerCase()).maybeSingle() : { data: null };
+  return NextResponse.json({ signedIn: true, id: r.id, name: r.name, avatar: r.avatar, email: r.email, subscribed: sub?.status === "active" }, { headers: noStore });
 }
 
 const Patch = z.object({

@@ -118,7 +118,7 @@ export async function SectionIndex({ type, q, category }: { type: PieceType; q?:
           </>
         )}
 
-        <section className="wrap" style={{ paddingBottom: 72 }}>
+        <section className="wrap when-unsub" style={{ paddingBottom: 72 }}>
           <div className="taped" style={{ padding: "clamp(24px, 4vw, 40px)", display: "flex", flexWrap: "wrap", gap: "20px 48px", alignItems: "center" }}>
             <div style={{ flex: "1 1 360px" }}>
               <h2 style={{ margin: "0 0 6px", fontSize: 30, fontWeight: 800, fontStretch: "78%" }}>New {s.plural.toLowerCase()} are linked in the newsletter</h2>

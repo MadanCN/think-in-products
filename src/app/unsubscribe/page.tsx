@@ -1,3 +1,4 @@
+import { MarkSubscribed } from "@/components/MarkSubscribed";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -14,6 +15,7 @@ export default async function Unsubscribe(props: PageProps<"/unsubscribe">) {
   }
   return (
     <>
+      {done ? <MarkSubscribed on={false} /> : null}
       <SiteHeader />
       <main id="main" className="wrap" style={{ paddingTop: 48, paddingBottom: 120, maxWidth: 760 }}>
         <h1 className="display" style={{ fontSize: "clamp(44px, 5vw, 68px)", marginBottom: 16 }}>{done ? "You're unsubscribed." : "That link didn't work."}</h1>

@@ -51,7 +51,7 @@ export default async function Home() {
           <div style={{ margin: "40px auto 0", maxWidth: 560 }}>
             <SubscribeForm source="home-hero" />
           </div>
-          <p style={{ margin: "14px 0 0", fontSize: 15, color: "var(--ink-3)" }}>
+          <p className="when-unsub" style={{ margin: "14px 0 0", fontSize: 15, color: "var(--ink-3)" }}>
             One email a week. Or {start ? <Link href={pieceUrl(start)} style={{ fontWeight: 700 }}>try a free article first</Link> : "browse the articles"}.
           </p>
         </div>
@@ -120,7 +120,7 @@ export default async function Home() {
               <p style={{ margin: "16px 0 24px", fontSize: 19, color: "var(--on-dark-2)", maxWidth: 560 }}>{latestIssue.subtitle}</p>
               <Link href={pieceUrl(latestIssue)} className="btn btn-yellow">Read this issue</Link>
             </div>
-            <div style={{ flex: "1 1 360px", minWidth: 0, maxWidth: 480 }}>
+            <div className="when-unsub" style={{ flex: "1 1 360px", minWidth: 0, maxWidth: 480 }}>
               <p style={{ margin: "0 0 12px", fontWeight: 700, color: "var(--sheet)" }}>Get the next one in your inbox</p>
               <SubscribeForm source="home-issue" dark />
             </div>

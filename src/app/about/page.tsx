@@ -35,7 +35,7 @@ export default function About() {
           <h2>Get in touch</h2>
           <p>Questions, corrections or ideas? <Link href="/contact">Send me a message</Link>. Want to publish your own piece here? <Link href="/write-for-us">Pitch it</Link>.</p>
         </div>
-        <div className="taped" style={{ marginTop: 40, padding: 28 }}>
+        <div className="taped when-unsub" style={{ marginTop: 40, padding: 28 }}>
           <p style={{ margin: "0 0 12px", fontWeight: 700 }}>Get the weekly newsletter</p>
           <SubscribeForm source="about" />
         </div>

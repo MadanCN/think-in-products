@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MarkSubscribed } from "@/components/MarkSubscribed";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 
 export const metadata = { title: "Welcome" };
@@ -6,6 +7,7 @@ export const metadata = { title: "Welcome" };
 export default function Welcome() {
   return (
     <>
+      <MarkSubscribed on />
       <SiteHeader />
       <main id="main" className="wrap" style={{ paddingTop: 48, paddingBottom: 120, maxWidth: 820 }}>
         <p className="hand red" style={{ fontSize: 26, margin: "0 0 10px" }}>you&apos;re in</p>

@@ -26,7 +26,7 @@ export function SiteHeader({ active }: { active?: NavKey }) {
           <Link href="/search" aria-label="Search" className="nav-icon">
             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M20 20l-4.6-4.6" /></svg>
           </Link>
-          <Link href="/subscribe" className="btn btn-dark btn-sm">Subscribe</Link>
+          <Link href="/subscribe" className="btn btn-dark btn-sm when-unsub">Subscribe</Link>
           <AccountMenu active={active === "login"} />
         </nav>
         <details className="mobile-nav">
@@ -37,7 +37,7 @@ export function SiteHeader({ active }: { active?: NavKey }) {
             {NAV.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}
             <Link href="/search">Search</Link>
             <MobileAccountLinks />
-            <Link href="/subscribe" className="btn btn-red">Subscribe free</Link>
+            <Link href="/subscribe" className="btn btn-red when-unsub">Subscribe free</Link>
           </div>
         </details>
       </div>
@@ -55,7 +55,7 @@ export function SiteFooter() {
             <Logo height={34} tone="light" />
             <p>A notebook for learning product management. Make the call first, then see how a PM would think it through.</p>
           </div>
-          <div className="footer-sub">
+          <div className="footer-sub when-unsub">
             <p className="hand" style={{ margin: "0 0 10px", fontSize: 22, color: "var(--highlighter)" }}>one email a week, every Sunday-ish</p>
             <SubscribeForm source="footer" cta="Subscribe" dark />
           </div>
@@ -76,7 +76,7 @@ export function SiteFooter() {
           </nav>
           <nav aria-label="Account">
             <h2>Account</h2>
-            <Link href="/subscribe">Subscribe</Link>
+            <Link href="/subscribe" className="when-unsub">Subscribe</Link>
             <Link href="/plans">Plans</Link>
             <Link href="/account">Your profile</Link>
           </nav>

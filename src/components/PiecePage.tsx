@@ -37,8 +37,7 @@ export async function PiecePage({ type, slug }: { type: PieceType; slug: string 
       <SiteHeader active={type} />
       <main id="main">
         <PieceView piece={shown} author={author} locked={!allowed} lockedPlan={piece.access} />
-        {type !== "newsletter" ? <Comments pieceId={piece.id} pieceUrl={pieceUrl(piece)} /> : null}
-        <section className="wrap" style={{ paddingBottom: 72 }}>
+        <section className="wrap when-unsub" style={{ paddingBottom: 56 }}>
           <div className="col taped" style={{ padding: "clamp(24px, 4vw, 40px)" }}>
             <h2 style={{ margin: "0 0 8px", fontSize: 30, fontWeight: 800, fontStretch: "78%" }}>
               {type === "newsletter" ? "Get the next issue in your inbox" : "Liked this? Get the weekly newsletter"}
@@ -46,12 +45,15 @@ export async function PiecePage({ type, slug }: { type: PieceType; slug: string 
             <p style={{ margin: "0 0 18px", color: "var(--ink-2)" }}>One email a week with what&apos;s new, a practical tip, and links to the week&apos;s pieces.</p>
             <SubscribeForm source={`piece:${piece.slug}`} />
           </div>
-          {type !== "newsletter" ? (
+        </section>
+        {type !== "newsletter" ? <Comments pieceId={piece.id} pieceUrl={pieceUrl(piece)} /> : null}
+        {type !== "newsletter" ? (
+          <section className="wrap" style={{ paddingBottom: 72 }}>
             <p className="col write-for-us-line">
               Would you like to publish your piece in ThinkInProducts? <Link href="/write-for-us">Pitch your idea</Link>
             </p>
-          ) : null}
-        </section>
+          </section>
+        ) : null}
         {related.length ? (
           <section className="wrap" style={{ paddingBottom: 80 }} aria-labelledby="related-h">
             <h2 id="related-h" className="h2" style={{ fontSize: 32, marginBottom: 20 }}>Read next</h2>

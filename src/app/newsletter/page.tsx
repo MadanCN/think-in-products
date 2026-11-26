@@ -33,7 +33,7 @@ export default async function NewsletterPage() {
             <h1 className="display" style={{ fontSize: "clamp(46px, 6vw, 84px)", margin: "16px 0 14px" }}>The weekly newsletter</h1>
             <p className="lead" style={{ margin: 0, maxWidth: 620 }}>{s.blurb} The only thing ThinkInProducts sends by email.</p>
           </div>
-          <div className="index-search" style={{ background: "var(--highlighter)", border: "2px solid var(--graphite)", boxShadow: "8px 8px 0 var(--graphite)", padding: 20 }}>
+          <div className="index-search when-unsub" style={{ background: "var(--highlighter)", border: "2px solid var(--graphite)", boxShadow: "8px 8px 0 var(--graphite)", padding: 20 }}>
             <p style={{ margin: "0 0 10px", fontWeight: 700 }}>Get the next issue</p>
             <SubscribeForm source="newsletter-page" cta="Subscribe" />
           </div>

@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useId, useState } from "react";
+import { markSubscribed } from "@/lib/subscribed-flag";
 
 export function SubscribeForm({ cta = "Subscribe free", source = "site", dark = false }: { cta?: string; source?: string; dark?: boolean }) {
   const id = useId();
@@ -18,6 +20,7 @@ export function SubscribeForm({ cta = "Subscribe free", source = "site", dark = 
     }).catch(() => null);
     const data = res ? await res.json().catch(() => ({})) : {};
     if (res?.ok) {
+      markSubscribed(true, false);
       setState("done");
       setMessage(data.message ?? "Check your inbox and click the link to confirm.");
     } else {
@@ -35,7 +38,11 @@ export function SubscribeForm({ cta = "Subscribe free", source = "site", dark = 
   }
 
   return (
-    <form onSubmit={submit} style={{ display: "flex", flexWrap: "wrap", gap: 10, width: "100%" }}>
+    <>
+    <p className="when-sub hand" style={{ fontSize: 22, margin: 0, color: dark ? "var(--highlighter)" : "var(--blue)" }}>
+      You&apos;re subscribed. The next issue lands in your inbox. <Link href="/articles" style={{ color: "inherit" }}>Keep reading</Link>
+    </p>
+    <form onSubmit={submit} className="when-unsub" style={{ display: "flex", flexWrap: "wrap", gap: 10, width: "100%" }}>
       <label htmlFor={id} className="sr-only">Email address</label>
       <input
         id={id}
@@ -53,5 +60,6 @@ export function SubscribeForm({ cta = "Subscribe free", source = "site", dark = 
       </button>
       {state === "error" ? <p role="alert" style={{ flexBasis: "100%", margin: 0, color: "var(--red)", fontSize: 15 }}>{message}</p> : null}
     </form>
+    </>
   );
 }

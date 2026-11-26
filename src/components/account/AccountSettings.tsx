@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { markSubscribed } from "@/lib/subscribed-flag";
 import { loadMe } from "./useMe";
 
 async function call(url: string, method: string, body: unknown) {
@@ -85,7 +86,7 @@ export function AccountSettings({ name, bio, notifyReplies, newsletterOn, email 
       <div className="settings-card">
         <h3>Email</h3>
         <p className="small" style={{ margin: "0 0 10px" }}>Sent to {email}</p>
-        <Toggle label="The weekly newsletter" help="One email a week with new pieces and a practical tip." on={newsletterOn} onChange={(on) => call("/api/me/newsletter", "POST", { on })} />
+        <Toggle label="The weekly newsletter" help="One email a week with new pieces and a practical tip." on={newsletterOn} onChange={async (on) => { await call("/api/me/newsletter", "POST", { on }); markSubscribed(on); }} />
         <Toggle label="Replies to my comments" help="An email when someone replies to you." on={notifyReplies} onChange={(v) => call("/api/me", "PATCH", { notifyReplies: v })} />
       </div>
 
