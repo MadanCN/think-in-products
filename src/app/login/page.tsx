@@ -17,9 +17,11 @@ export default async function LoginPage(props: PageProps<"/login">) {
   const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
   return (
     <>
-      <header className="wrap site-header">
-        <Logo />
-        <Link href="/" style={{ color: "var(--graphite)", fontWeight: 600, fontSize: 16 }}>Back to the notebook</Link>
+      <header className="site-header">
+        <div className="wrap site-header-inner">
+          <Logo />
+          <Link href="/" className="back-link">← Back to the notebook</Link>
+        </div>
       </header>
       <main id="main" className="wrap" style={{ paddingTop: 32, paddingBottom: 96, display: "flex", flexWrap: "wrap-reverse", gap: "48px 72px", alignItems: "center", maxWidth: 1180 }}>
         <div style={{ flex: "1 1 420px", minWidth: 0 }}>

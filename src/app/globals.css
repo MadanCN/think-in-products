@@ -206,3 +206,6 @@ textarea.field { resize: vertical; min-height: 44px; line-height: 1.5; }
 .form-done h2 { margin: 0 0 10px; font-size: 34px; font-weight: 800; font-stretch: 78%; }
 .form-done p { margin: 0; color: var(--ink-2); }
 @media (max-width: 860px) { .form-page { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } }
+
+.back-link { color: var(--graphite); font-weight: 600; font-size: 16px; text-decoration: none; }
+.back-link:hover { text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 2px; }
