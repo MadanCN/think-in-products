@@ -45,7 +45,7 @@ export const SEED_PIECES: Piece[] = [
     featured: true,
     seo_title: "What Is Product Management? A Plain-English Guide With Examples",
     seo_description: "What a product manager actually does, explained by following one real request: why before how, PM vs project manager, and the habits that matter.",
-    published_at: "2026-12-01T03:30:00.000Z",
+    published_at: "2026-11-23T04:30:00.000Z",
     blocks: [
       {
         id: "call1",
@@ -179,7 +179,7 @@ They share two letters and often a calendar, but they answer different questions
     },
     seo_title: "Netflix Case Study: How Netflix Moved From DVD Rentals to Streaming",
     seo_description: "A detailed product case study of Netflix's shift from DVD-by-mail to streaming: the 2007 launch, the 2011 Qwikster crisis, and the lessons for product managers.",
-    published_at: "2026-12-04T03:30:00.000Z",
+    published_at: "2026-11-25T04:30:00.000Z",
     blocks: [
       {
         id: "nf-call",
@@ -520,7 +520,7 @@ That's the last lesson: ==you don't have to kill the old business on the day you
     },
     seo_title: "Amazon Flywheel Explained: How Amazon's Virtuous Cycle Works",
     seo_description: "A product breakdown of the Amazon flywheel: customer experience, traffic, sellers, selection, lower costs and lower prices, and how to find your own.",
-    published_at: "2026-12-03T03:30:00.000Z",
+    published_at: "2026-11-24T04:30:00.000Z",
     blocks: [
       {
         id: "am-call",
@@ -708,7 +708,7 @@ Flywheels aren't magic, and Amazon's has costs.
     issue_number: 1,
     seo_title: "ThinkInProducts Newsletter, Issue #1",
     seo_description: "The first issue of the ThinkInProducts newsletter: what to expect each week and three pieces to start with.",
-    published_at: "2026-12-06T03:30:00.000Z",
+    published_at: "2026-11-26T04:30:00.000Z",
     blocks: [
       {
         id: "nl-hello",
