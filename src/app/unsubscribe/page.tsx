@@ -1,5 +1,6 @@
 import { MarkSubscribed } from "@/components/MarkSubscribed";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
+import { syncContact } from "@/lib/email/audience";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Unsubscribe" };
@@ -10,8 +11,9 @@ export default async function Unsubscribe(props: PageProps<"/unsubscribe">) {
   const db = createAdminClient();
   let done = false;
   if (db && /^[0-9a-f-]{36}$/i.test(token)) {
-    const { error } = await db.from("subscribers").update({ status: "unsubscribed" }).eq("unsubscribe_token", token);
+    const { data, error } = await db.from("subscribers").update({ status: "unsubscribed" }).eq("unsubscribe_token", token).select("email").maybeSingle();
     done = !error;
+    if (data?.email) await syncContact(data.email, false);
   }
   return (
     <>

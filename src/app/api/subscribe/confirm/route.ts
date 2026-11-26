@@ -1,4 +1,5 @@
 import { NextResponse, after } from "next/server";
+import { syncContact } from "@/lib/email/audience";
 import { sendWelcome } from "@/lib/email/welcome";
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -15,7 +16,10 @@ export async function GET(request: Request) {
       .neq("status", "unsubscribed")
       .select("email")
       .maybeSingle();
-    if (data?.email) after(() => sendWelcome(data.email));
+    if (data?.email) after(async () => {
+      await syncContact(data.email, true);
+      await sendWelcome(data.email);
+    });
   }
   return NextResponse.redirect(new URL("/welcome", url.origin));
 }

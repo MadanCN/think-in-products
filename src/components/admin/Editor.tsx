@@ -82,7 +82,7 @@ function SendDialog({ piece, local, onClose }: { piece: Piece; local: boolean; o
     setMsg("");
     const res = await fetch("/api/admin/send", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pieceId: piece.id, mode, testEmail, audience }) });
     const data = await res.json().catch(() => ({}));
-    setMsg(res.ok ? (mode === "test" ? `Test sent to ${testEmail}.` : `Sent to ${data.sent} subscribers.`) : data.error ?? "Send failed.");
+    setMsg(res.ok ? (mode === "test" ? `Test sent to ${testEmail}.` : data.broadcast ? `Sent to ${data.sent} subscribers as a Resend broadcast. Delivery numbers show up on the dashboard as they come in.` : `Sent to ${data.sent} subscribers.`) : data.error ?? "Send failed.");
     setBusy(false);
     setConfirm(false);
   }

@@ -1,5 +1,6 @@
 import "server-only";
 import { listAuthors, listPieces, serviceClient } from "./repo";
+import { syncContact } from "./email/audience";
 import { sendWelcome } from "./email/welcome";
 import { createClient } from "./supabase/server";
 import { pieceUrl, type Piece, type PieceType } from "./types";
@@ -344,5 +345,6 @@ export async function optInAtSignIn(userId: string, email: string) {
   const row = { status: "active", user_id: userId, confirmed_at: new Date().toISOString() };
   if (existing) await db.from("subscribers").update(row).eq("id", existing.id);
   else await db.from("subscribers").insert({ email: addr, source: "sign-in", ...row });
+  await syncContact(addr, true);
   await sendWelcome(addr).catch(() => null);
 }

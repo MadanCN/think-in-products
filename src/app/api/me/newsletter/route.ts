@@ -1,4 +1,5 @@
 import { NextResponse, after } from "next/server";
+import { syncContact } from "@/lib/email/audience";
 import { sendWelcome } from "@/lib/email/welcome";
 import { sameOrigin } from "@/lib/admin-auth";
 import { getReader } from "@/lib/reader";
@@ -22,6 +23,9 @@ export async function POST(request: Request) {
     ? await db.from("subscribers").update(patch).eq("id", existing.id)
     : await db.from("subscribers").insert({ email, source: "profile", ...patch });
   if (error) return NextResponse.json({ error: "Couldn't save. Try again." }, { status: 500 });
-  if (on) after(() => sendWelcome(email));
+  after(async () => {
+    await syncContact(email, on);
+    if (on) await sendWelcome(email);
+  });
   return NextResponse.json({ ok: true, on });
 }

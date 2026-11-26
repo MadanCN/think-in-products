@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { denyUnlessAdmin } from "@/lib/admin-auth";
+import { SEGMENT_ID, broadcastsEnabled, reconcileList } from "@/lib/email/audience";
 import { FROM, getResend, renderPieceEmail } from "@/lib/email/send";
 import { getPiece, serviceClient } from "@/lib/repo";
 import { SITE_URL } from "@/lib/supabase/env";
@@ -38,6 +39,34 @@ export async function POST(request: Request) {
   if (!list.length) return NextResponse.json({ error: "No active subscribers in that audience yet." }, { status: 400 });
 
   const { data: send } = await db.from("sends").insert({ piece_id: piece.id, audience: body.audience ?? "all", recipient_count: list.length, status: "sending" }).select("id").single();
+
+  // Everyone: one Resend broadcast to the newsletter list. Broadcasts are priced by
+  // contacts, not per email, so weekly issues stay on the free plan up to 1,000 people.
+  if ((body.audience ?? "all") === "all" && broadcastsEnabled()) {
+    try {
+      const synced = await reconcileList(list.map((s) => s.email));
+      const { data: b, error } = await resend.broadcasts.create({
+        segmentId: SEGMENT_ID,
+        from: FROM,
+        replyTo: process.env.INBOX_NOTIFY_EMAIL || undefined,
+        subject: piece.title,
+        previewText: piece.subtitle || undefined,
+        name: piece.issue_number ? `Issue #${piece.issue_number}: ${piece.title}` : piece.title,
+        // Resend swaps this placeholder for each reader's own unsubscribe link.
+        html: await renderPieceEmail(piece, "{{{RESEND_UNSUBSCRIBE_URL}}}"),
+        send: true,
+      });
+      if (error || !b) throw new Error(error?.message ?? "Resend didn't accept the broadcast.");
+      await db.from("sends").update({ status: "sent", sent_at: new Date().toISOString(), broadcast_id: b.id }).eq("id", send?.id);
+      return NextResponse.json({ sent: list.length, broadcast: b.id, listChanges: synced });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Send failed";
+      await db.from("sends").update({ status: "failed", error: message }).eq("id", send?.id);
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
+  }
+
+  // Free-only or paid-only issues (and setups without a Resend list) go one email each.
   let sent = 0;
   try {
     for (let i = 0; i < list.length; i += 100) {
