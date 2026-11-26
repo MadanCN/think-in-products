@@ -46,7 +46,7 @@ export default async function Home() {
             Every product is someone deciding <span className="sweep">what&apos;s worth building next.</span>
           </h1>
           <p className="lead" style={{ margin: "28px auto 0", maxWidth: 620, lineHeight: 1.65 }}>
-            Behind every feature is a choice: what to build, for whom, and why now. That&apos;s product management.
+            Behind every meaningful product is a deep understanding of people, their problems, and what could be better.
           </p>
           <div style={{ margin: "40px auto 0", maxWidth: 560 }}>
             <SubscribeForm source="home-hero" />
